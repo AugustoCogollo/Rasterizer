@@ -4,7 +4,7 @@ STD = -std=c99
 OFLAGS = -fsanitize-undefined-trap-on-error -fsanitize=undefined
 LFLAGS = -lmingw32 -lSDL2main -lSDL2
 CFLAGS = -Iinclude/SDL2 
-SRC_FILES = ./src/*.c ./src/Display/*.c
+SRC_FILES = ./src/*.c ./src/Display/*.c ./src/Vectors/*.c
 OBJ_NAME = -o renderer
 
 build:

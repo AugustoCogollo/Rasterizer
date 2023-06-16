@@ -46,8 +46,10 @@ bool initialize_window(void) {
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if(x > window_width || y > window_height || x < 0 || y < 0)
-        return;
+    if(x > window_width || y > window_height || x < 0 || y < 0){
+      //printf("A pixel could not be drawn at x: %d, y: %d", x, y);
+      return;
+    }
 
     color_buffer[(window_width * y) + x] = color;
 }
@@ -55,7 +57,7 @@ void draw_pixel(int x, int y, uint32_t color) {
 void draw_rect(int x, int y, int width, int height, uint32_t color){
   for(size_t i = y; i < (height + y); i++)
     for(size_t j = x; j < (width + x); j++){
-      color_buffer[(window_width * i) + j] = color;
+      draw_pixel(j, i, color);
     }
 }
 

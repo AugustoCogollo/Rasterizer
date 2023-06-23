@@ -55,36 +55,42 @@ void draw_pixel(int x, int y, uint32_t color) {
     color_buffer[(window_width * y) + x] = color;
 }
 
-void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
-  int delta_x = (x1 - x0);
-  int delta_y = (y1 - y0);
+void draw_line(vec2_t point1, vec2_t point2, uint32_t color) {
+  int delta_x = (point2.x - point1.x);
+  int delta_y = (point2.y - point1.y);
 
   //Side length will check which side is the longest 
-  int side_length = abs(delta_x) >= abs(delta_y) ? abs(delta_x) : abs(delta_y);
+  int side_length = (abs(delta_x) >= abs(delta_y))   ? abs(delta_x) : abs(delta_y);
 
   float x_inc = delta_x / (float)side_length;
   float y_inc = delta_y / (float)side_length;
 
-  float current_x = x0;
-  float current_y = y0;
+  float current_x = point1.x;
+  float current_y = point1.y;
 
   for(size_t i = 0; i <= side_length; i++) {
-    draw_rect(round(current_x), round(current_y), 4, 4, color);
+    draw_pixel(round(current_x), round(current_y), color);
     current_x += x_inc;
     current_y += y_inc;
   }
 }
 
-void draw_rect(int x, int y, int width, int height, uint32_t color){
+void draw_triangle(triangle_t triangle, uint32_t color) {
+  draw_line(triangle.points[0], triangle.points[1], color);
+  draw_line(triangle.points[0], triangle.points[2], color);
+  draw_line(triangle.points[1], triangle.points[2], color);
+}
+
+void draw_rect(int x, int y, int width, int height, uint32_t color) {
   for(size_t i = y; i < (height + y); i++)
-    for(size_t j = x; j < (width + x); j++){
+    for(size_t j = x; j < (width + x); j++) {
       draw_pixel(j, i, color);
     }
 }
 
-void draw_grid(uint32_t color){
+void draw_grid(uint32_t color) {
   for(size_t y = 0; y < window_height; y++)
-    for(size_t x = 0; x < window_width; x++){
+    for(size_t x = 0; x < window_width; x++) {
       if(y % 10 == 0 || x % 10 == 0) {
         color_buffer[(window_width * y) + x] = color;
       }
@@ -115,7 +121,6 @@ void clear_color_buffer(uint32_t color){
 }
 
 void clean_up(void){
-  free(color_buffer);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();

@@ -11,6 +11,8 @@ extern face_t cube_faces[N_CUBE_FACES];
 
 typedef struct {
     vec3_t* vertices;
+    vec2_t* tex_coords;
+    vec3_t* normals;
     face_t* faces;
     vec3_t rotation;
 } mesh_t;
@@ -18,3 +20,4 @@ typedef struct {
 extern mesh_t mesh;
 
 void load_cube_mesh_data(void);
+void load_obj_file(char* filename);

@@ -56,8 +56,8 @@ void setup(void) {
     window_height
   );
 
-  load_cube_mesh_data();
-
+  //load_cube_mesh_data();
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
 }
 
 void process_input(void) {
@@ -97,9 +97,9 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  mesh.rotation.x += 0.5 * delta_time;
+  //mesh.rotation.x += 0.5 * delta_time;
   mesh.rotation.y += 0.5 * delta_time;
-  mesh.rotation.z += 0.5 * delta_time;
+  //mesh.rotation.z += 0.5 * delta_time;
 
   int num_faces = array_length(mesh.faces);
   for(size_t i = 0; i < num_faces; i++) {

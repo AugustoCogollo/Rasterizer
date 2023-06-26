@@ -13,7 +13,9 @@ typedef struct {
     vec3_t* vertices;
     vec2_t* tex_coords;
     vec3_t* normals;
-    face_t* faces;
+    face_t* vertex_faces;
+    face_t* texture_faces;
+    face_t* normal_faces;
     vec3_t rotation;
 } mesh_t;
 

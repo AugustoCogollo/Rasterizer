@@ -8,7 +8,7 @@ mesh_t mesh = {
   .vertices = NULL,
   .tex_coords = NULL,
   .normals = NULL,
-  .faces = NULL,
+  .vertex_faces = NULL,
   .rotation = { 0, 0, 0 }
 };
 
@@ -51,14 +51,14 @@ void load_cube_mesh_data(void) {
   }
   for(size_t i = 0; i < N_CUBE_FACES; i++) {
     face_t cube_face = cube_faces[i];
-    array_push(mesh.faces, cube_face);
+    array_push(mesh.vertex_faces, cube_face);
   }
 }
 
 void load_obj_file(char* filename) {
   FILE* file_id;
   //int size = 1024, pos;
-  char line[256];
+  char line[1024];
 
   if((file_id = fopen(filename, "r")) == NULL) {
     printf("There was an error trying to open the file \n");
@@ -67,36 +67,35 @@ void load_obj_file(char* filename) {
 
   while(fgets(line, sizeof(line), file_id)) {
     char* saveptr = NULL;
-    char line_copy[256];
+    char line_copy[1024];
     strcpy(line_copy, line);
     char* token = strtok_r(line_copy, " ", &saveptr);
     //printf("Token: %s\n", token);
 
     if(strcmp(token, "v") == 0){
-      char letter;
       vec3_t vertex;
-      sscanf(line, "%c %f %f %f", &letter, &vertex.x, &vertex.y, & vertex.z);
+      sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, & vertex.z);
       array_push(mesh.vertices, vertex);
     }
 
     else if(strcmp(token, "vt") == 0){
-      char letter;
       vec2_t tex_coord;
-      sscanf(line, "%c %c %f %f", &letter, &letter, &tex_coord.x, &tex_coord.y);
+      sscanf(line, "vt %f %f", &tex_coord.x, &tex_coord.y);
       array_push(mesh.tex_coords, tex_coord);
     }
 
     else if(strcmp(token, "vn") == 0){
-      char letter;
       vec3_t normal;
-      sscanf(line, "%c %c %f %f %f", &letter, &letter, &normal.x, &normal.y, &normal.z);
+      sscanf(line, "vn %f %f %f", &normal.x, &normal.y, &normal.z);
       array_push(mesh.normals, normal);
     }
 
     else if(strcmp(token, "f") == 0){
         char* saveptr_index = NULL;
         char* data;
-        face_t face;
+        face_t vertex_face;
+        face_t texture_face;
+        face_t normal_face;
         //This first assignment of data returns f so the second assignment gives us the index information like 1/1/1 and the second would return 2/2/1 inside cube.obj
         data = strtok_r(line, " ", &saveptr_index);
         data = strtok_r(NULL, " ", &saveptr_index);
@@ -106,18 +105,22 @@ void load_obj_file(char* filename) {
         face_indexes[0] = token[0] - '0';
         face_indexes[1] = token[2] - '0';
         face_indexes[2] = token[4] - '0';
-        printf("Test values: %d %d %d\n", face_indexes[0], face_indexes[1], face_indexes[2]);
         */
 
-        sscanf(data, "%d", &face.a);
+        sscanf(data, "%d/%d/%d", &vertex_face.a, &texture_face.a, &normal_face.a);
+        printf("Test values: %d %d %d ", vertex_face.a, texture_face.a, normal_face.a);
 
         data = strtok_r(NULL, " ", &saveptr_index);
-        sscanf(data, "%d", &face.b);
+        sscanf(data, "%d/%d/%d", &vertex_face.b, &texture_face.b, &normal_face.b);
+        printf("Test values: %d %d %d ", vertex_face.b, texture_face.b, normal_face.b);
 
         data = strtok_r(NULL, " ", &saveptr_index);
-        sscanf(data, "%d", &face.c);
+        sscanf(data, "%d/%d/%d", &vertex_face.c, &texture_face.b, &normal_face.c);
+        printf("Test values: %d %d %d\n", vertex_face.c, texture_face.c, normal_face.c);
 
-        array_push(mesh.faces, face);
+        array_push(mesh.vertex_faces, vertex_face);
+        array_push(mesh.texture_faces, texture_face);
+        array_push(mesh.normal_faces, normal_face);
     }
   }
 

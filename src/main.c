@@ -58,7 +58,7 @@ void setup(void) {
   );
 
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/sphere.obj");
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
 }
 
 void process_input(void) {
@@ -102,9 +102,9 @@ void update(void) {
   mesh.rotation.y += 0.5 * delta_time;
   mesh.rotation.z += 0.5 * delta_time;
 
-  int num_faces = array_length(mesh.faces);
+  int num_faces = array_length(mesh.vertex_faces);
   for(size_t i = 0; i < num_faces; i++) {
-    face_t mesh_face = mesh.faces[i];
+    face_t mesh_face = mesh.vertex_faces[i];
     vec3_t face_vertices[3];
     face_vertices[0] = mesh.vertices[mesh_face.a - 1];
     face_vertices[1] = mesh.vertices[mesh_face.b - 1];
@@ -160,6 +160,10 @@ void render(void){
 
 void free_resources(void) {
   array_free(mesh.vertices);
-  array_free(mesh.faces);
+  array_free(mesh.tex_coords);
+  array_free(mesh.normals);
+  array_free(mesh.vertex_faces);
+  array_free(mesh.texture_faces);
+  array_free(mesh.normal_faces);
   free(color_buffer);
 }

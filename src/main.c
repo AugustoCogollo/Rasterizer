@@ -9,6 +9,7 @@
 #include "Mesh/mesh.h"
 
 triangle_t* triangles_to_render = NULL;
+uint32_t mesh_color = 0xFFFF0000;
 
 float fov_factor = 640;
 
@@ -57,7 +58,7 @@ void setup(void) {
   );
 
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/sphere.obj");
 }
 
 void process_input(void) {
@@ -97,9 +98,9 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  //mesh.rotation.x += 0.5 * delta_time;
+  mesh.rotation.x += 0.5 * delta_time;
   mesh.rotation.y += 0.5 * delta_time;
-  //mesh.rotation.z += 0.5 * delta_time;
+  mesh.rotation.z += 0.5 * delta_time;
 
   int num_faces = array_length(mesh.faces);
   for(size_t i = 0; i < num_faces; i++) {
@@ -142,11 +143,11 @@ void render(void){
   int num_triangles = array_length(triangles_to_render);
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
-    draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, 0xFFFF0088);
-    draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, 0xFFFF0088);
-    draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, 0xFFFF0088);
+    draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, mesh_color);
+    draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, mesh_color);
+    draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, mesh_color);
 
-    draw_triangle(triangle, 0xFFFF0088);
+    draw_triangle(triangle, mesh_color);
   }
 
   array_free(triangles_to_render);

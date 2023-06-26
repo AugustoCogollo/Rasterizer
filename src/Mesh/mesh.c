@@ -66,41 +66,42 @@ void load_obj_file(char* filename) {
   }
 
   while(fgets(line, sizeof(line), file_id)) {
-    switch(line[0]){
-      case 'v':
-        if(line[1] == ' ') {
-          //Letter is used to correctly separate the information inside each line with a v(space) 
-          char letter;
-          vec3_t vertex;
-          sscanf(line, "%c %f %f %f", &letter, &vertex.x, &vertex.y, & vertex.z);
-          array_push(mesh.vertices, vertex);
-        }
-        
-        else if(line[1] == 't') {
-          char letter;
-          vec2_t tex_coord;
-          sscanf(line, "%c %c %f %f", &letter, &letter, &tex_coord.x, &tex_coord.y);
-          array_push(mesh.tex_coords, tex_coord);
-        }
+    char* saveptr = NULL;
+    char line_copy[256];
+    strcpy(line_copy, line);
+    char* token = strtok_r(line_copy, " ", &saveptr);
+    //printf("Token: %s\n", token);
 
-        else if(line[1] == 'n') {
-          char letter;
-          vec3_t normal;
-          sscanf(line, "%c %c %f %f %f", &letter, &letter, &normal.x, &normal.y, &normal.z);
-          array_push(mesh.normals, normal);
-        }
+    if(strcmp(token, "v") == 0){
+      char letter;
+      vec3_t vertex;
+      sscanf(line, "%c %f %f %f", &letter, &vertex.x, &vertex.y, & vertex.z);
+      array_push(mesh.vertices, vertex);
+    }
 
-        break;
+    else if(strcmp(token, "vt") == 0){
+      char letter;
+      vec2_t tex_coord;
+      sscanf(line, "%c %c %f %f", &letter, &letter, &tex_coord.x, &tex_coord.y);
+      array_push(mesh.tex_coords, tex_coord);
+    }
 
-      case 'f':
-        char* saveptr = NULL;
-        char* token;
+    else if(strcmp(token, "vn") == 0){
+      char letter;
+      vec3_t normal;
+      sscanf(line, "%c %c %f %f %f", &letter, &letter, &normal.x, &normal.y, &normal.z);
+      array_push(mesh.normals, normal);
+    }
+
+    else if(strcmp(token, "f") == 0){
+        char* saveptr_index = NULL;
+        char* data;
         face_t face;
-        //This first assignment of token returns f so the second assignment gives us the index information like 1/1/1 and the second would return 2/2/1 inside cube.obj
-        token = strtok_r(line, " ", &saveptr);
-        token = strtok_r(NULL, " ", &saveptr);
+        //This first assignment of data returns f so the second assignment gives us the index information like 1/1/1 and the second would return 2/2/1 inside cube.obj
+        data = strtok_r(line, " ", &saveptr_index);
+        data = strtok_r(NULL, " ", &saveptr_index);
         /* 
-        //The next five lines allow us to get each vvalue inside for example 1/1/1
+        //The next five lines allow us to get each value inside for example 1/1/1
         int face_indexes[3];
         face_indexes[0] = token[0] - '0';
         face_indexes[1] = token[2] - '0';
@@ -108,21 +109,15 @@ void load_obj_file(char* filename) {
         printf("Test values: %d %d %d\n", face_indexes[0], face_indexes[1], face_indexes[2]);
         */
 
-        sscanf(token, "%d", &face.a);
+        sscanf(data, "%d", &face.a);
 
-        token = strtok_r(NULL, " ", &saveptr);
-        sscanf(token, "%d", &face.b);
+        data = strtok_r(NULL, " ", &saveptr_index);
+        sscanf(data, "%d", &face.b);
 
-        token = strtok_r(NULL, " ", &saveptr);
-        sscanf(token, "%d", &face.c);
+        data = strtok_r(NULL, " ", &saveptr_index);
+        sscanf(data, "%d", &face.c);
 
         array_push(mesh.faces, face);
-               
-        break;
-
-      default:
-
-      break;
     }
   }
 

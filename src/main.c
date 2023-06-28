@@ -17,8 +17,7 @@ bool is_running = false;
 int previous_frame_time = 0;
 float delta_time = 0.0f;
 
-
-vec3_t camera_position = {.x = 0, .y = 0, .z = 5};
+vec3_t camera_position = { 0, 0, 0 };
 
 void setup(void);
 void process_input(void);
@@ -56,12 +55,6 @@ void setup(void) {
     window_width,
     window_height
   );
-
-  vec3_t a = { 3.0, 6.8, 9.4 };
-  vec3_t b = { 7.0, 3.2, 0.6 };
-  vec3_t* result = vec3_add(&a, &b);
-  vec3_div(result, 2);
-  printf("The sum is: %f, %f, %f\n", result->x, result->y, result->z);
 
   //load_cube_mesh_data();
   load_obj_file("C:/msys64/home/augus/Rasterizer/assets/sphere.obj");
@@ -118,6 +111,8 @@ void update(void) {
 
     triangle_t projected_triangle;
 
+    vec3_t transformed_vertices[3];
+    
     for(size_t j = 0; j < 3; j++) {
       vec3_t transformed_vertex = face_vertices[j];
       transformed_vertex = vec3_rotate_x(&transformed_vertex, mesh.rotation.x);
@@ -125,9 +120,39 @@ void update(void) {
       transformed_vertex = vec3_rotate_z(&transformed_vertex, mesh.rotation.z);
 
       //Translate the vertex away from the camera
-      transformed_vertex.z -= camera_position.z;
+      transformed_vertex.z += 5;
+      transformed_vertices[j] = transformed_vertex;
+    }
 
-      vec2_t projected_point = project(&transformed_vertex);
+    //Check backface culling before projecting
+    vec3_t vector_a = transformed_vertices[0];/*    A    */
+    vec3_t vector_b = transformed_vertices[1];/*   / \   */
+    vec3_t vector_c = transformed_vertices[2];/*  C---B  */
+
+    vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
+    vec3_normalize(&vector_ab);
+    vec3_t vector_ac = vec3_sub(&vector_c, &vector_a); //C-A vector
+    vec3_normalize(&vector_ac);
+
+    //Compute face normal (left handed system)
+    vec3_t normal = vec3_cross(&vector_ab, &vector_ac);
+
+    //Normalize the face normal vector
+    vec3_normalize(&normal);
+
+    //Find the vector between the camera position and point A
+    vec3_t camera_ray = vec3_sub(&camera_position, &vector_a);
+
+    //Calculate how aligned the normal is with the camera ray 
+    float dot_normal_camera = vec3_dot(&normal, &camera_ray);
+
+    if(dot_normal_camera < 0) {
+      continue;
+    }
+
+    for(size_t j = 0; j < 3; j++) {
+
+      vec2_t projected_point = project(&transformed_vertices[j]);
 
       //Scale and transform the projected points to the middle of the screen
       projected_point.x += (window_width / 2);

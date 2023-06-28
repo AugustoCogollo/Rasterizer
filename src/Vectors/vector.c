@@ -37,12 +37,17 @@ float vec2_dot(vec2_t* a, vec2_t* b) {
     return (a->x * b->x) + (a->y * b->y);
 }
 
+void vec2_normalize(vec2_t* vector) {
+    float magnitude = vec2_length(vector);
+    vec2_div(vector, magnitude);
+}
+
 float vec3_length(vec3_t* vector) {
     return sqrt((vector->x * vector->x) + (vector->y * vector->y) + (vector->z * vector->z));
 }
 
-vec3_t* vec3_add(vec3_t* a, vec3_t* b) { 
-    vec3_t* result = &(vec3_t) {
+vec3_t vec3_add(vec3_t* a, vec3_t* b) { 
+    vec3_t result = {
         .x = a->x + b->x,
         .y = a->y + b->y,
         .z = a->z + b->z
@@ -50,8 +55,8 @@ vec3_t* vec3_add(vec3_t* a, vec3_t* b) {
     return result;
 }
 
-vec3_t* vec3_sub(vec3_t* a, vec3_t* b) {
-    vec3_t* result = &(vec3_t) {
+vec3_t vec3_sub(vec3_t* a, vec3_t* b) {
+    vec3_t result = {
         .x = a->x - b->x,
         .y = a->y - b->y,
         .z = a->z - b->z
@@ -71,8 +76,8 @@ void vec3_div(vec3_t* vector, float factor) {
     vector->z /= factor;
 }
 
-vec3_t* vec3_cross(vec3_t* a, vec3_t* b) {
-    vec3_t* result = &(vec3_t) {
+vec3_t vec3_cross(vec3_t* a, vec3_t* b) {
+    vec3_t result = {
         .x = (a->y * b->z) - (a->z * b->y),
         .y = (a->z * b->x) - (a->x * b->z),
         .z = (a->x * b->y) - (a->y * b->x)
@@ -82,7 +87,12 @@ vec3_t* vec3_cross(vec3_t* a, vec3_t* b) {
 }
 
 float vec3_dot(vec3_t* a, vec3_t* b) {
-    return (a->x * b->x) + (a->y * b->y) + (a->z + b->z);
+    return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+}
+
+void vec3_normalize(vec3_t* vector) {
+    float magnitude = vec3_length(vector);
+    vec3_div(vector, magnitude);
 }
 
 vec3_t vec3_rotate_x(vec3_t* vector, float angle) {

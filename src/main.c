@@ -57,8 +57,14 @@ void setup(void) {
     window_height
   );
 
+  vec3_t a = { 3.0, 6.8, 9.4 };
+  vec3_t b = { 7.0, 3.2, 0.6 };
+  vec3_t* result = vec3_add(&a, &b);
+  vec3_div(result, 2);
+  printf("The sum is: %f, %f, %f\n", result->x, result->y, result->z);
+
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/sphere.obj");
 }
 
 void process_input(void) {
@@ -128,7 +134,6 @@ void update(void) {
       projected_point.y += (window_height / 2);
 
       projected_triangle.points[j] = projected_point;
-
     }
 
     array_push(triangles_to_render, projected_triangle);

@@ -72,6 +72,7 @@ void load_obj_file(char* filename) {
     char* token = strtok_r(line_copy, " ", &saveptr);
     //printf("Token: %s\n", token);
 
+    //strncmp can also be used 
     if(strcmp(token, "v") == 0){
       vec3_t vertex;
       sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, & vertex.z);
@@ -96,27 +97,17 @@ void load_obj_file(char* filename) {
         face_t vertex_face;
         face_t texture_face;
         face_t normal_face;
+        
         //This first assignment of data returns f so the second assignment gives us the index information like 1/1/1 and the second would return 2/2/1 inside cube.obj
         data = strtok_r(line, " ", &saveptr_index);
         data = strtok_r(NULL, " ", &saveptr_index);
-        /* 
-        //The next five lines allow us to get each value inside for example 1/1/1
-        int face_indexes[3];
-        face_indexes[0] = token[0] - '0';
-        face_indexes[1] = token[2] - '0';
-        face_indexes[2] = token[4] - '0';
-        */
-
         sscanf(data, "%d/%d/%d", &vertex_face.a, &texture_face.a, &normal_face.a);
-        printf("Test values: %d %d %d ", vertex_face.a, texture_face.a, normal_face.a);
 
         data = strtok_r(NULL, " ", &saveptr_index);
         sscanf(data, "%d/%d/%d", &vertex_face.b, &texture_face.b, &normal_face.b);
-        printf("Test values: %d %d %d ", vertex_face.b, texture_face.b, normal_face.b);
 
         data = strtok_r(NULL, " ", &saveptr_index);
         sscanf(data, "%d/%d/%d", &vertex_face.c, &texture_face.b, &normal_face.c);
-        printf("Test values: %d %d %d\n", vertex_face.c, texture_face.c, normal_face.c);
 
         array_push(mesh.vertex_faces, vertex_face);
         array_push(mesh.texture_faces, texture_face);

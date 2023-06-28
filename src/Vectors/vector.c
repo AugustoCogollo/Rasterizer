@@ -2,6 +2,89 @@
 #include <math.h>
 #include <stdlib.h>
 
+float vec2_length(vec2_t* vector) {
+    return sqrt((vector->x * vector->x) + (vector->y * vector->y));
+}
+
+vec2_t* vec2_add(vec2_t* a, vec2_t* b) {
+    //Compound literal
+    vec2_t* result = &(vec2_t) {
+        .x = a->x + b->x,
+        .y = a->y + b->y
+    };
+    return result;
+}
+
+vec2_t* vec2_sub(vec2_t* a, vec2_t* b) {
+    vec2_t* result = &(vec2_t) {
+        .x = a->x - b->x,
+        .y = a->y - b->y
+    };
+    return result;
+}
+
+void vec2_mult(vec2_t* vector, float scalar) {
+    vector->x *= scalar;
+    vector->y *= scalar;
+}
+
+void vec2_div(vec2_t* vector, float factor) {
+    vector->x /= factor;
+    vector->y /= factor;
+}
+
+float vec2_dot(vec2_t* a, vec2_t* b) {
+    return (a->x * b->x) + (a->y * b->y);
+}
+
+float vec3_length(vec3_t* vector) {
+    return sqrt((vector->x * vector->x) + (vector->y * vector->y) + (vector->z * vector->z));
+}
+
+vec3_t* vec3_add(vec3_t* a, vec3_t* b) { 
+    vec3_t* result = &(vec3_t) {
+        .x = a->x + b->x,
+        .y = a->y + b->y,
+        .z = a->z + b->z
+    };
+    return result;
+}
+
+vec3_t* vec3_sub(vec3_t* a, vec3_t* b) {
+    vec3_t* result = &(vec3_t) {
+        .x = a->x - b->x,
+        .y = a->y - b->y,
+        .z = a->z - b->z
+    };
+    return result;
+}
+
+void vec3_mult(vec3_t* vector, float scalar) {
+    vector->x *= scalar;
+    vector->y *= scalar;
+    vector->z *= scalar;
+}
+
+void vec3_div(vec3_t* vector, float factor) {
+    vector->x /= factor;
+    vector->y /= factor;
+    vector->z /= factor;
+}
+
+vec3_t* vec3_cross(vec3_t* a, vec3_t* b) {
+    vec3_t* result = &(vec3_t) {
+        .x = (a->y * b->z) - (a->z * b->y),
+        .y = (a->z * b->x) - (a->x * b->z),
+        .z = (a->x * b->y) - (a->y * b->x)
+    };
+
+    return result;
+}
+
+float vec3_dot(vec3_t* a, vec3_t* b) {
+    return (a->x * b->x) + (a->y * b->y) + (a->z + b->z);
+}
+
 vec3_t vec3_rotate_x(vec3_t* vector, float angle) {
     vec3_t rotated_vector = {
         .x = vector->x,

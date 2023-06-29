@@ -55,9 +55,9 @@ void draw_pixel(int x, int y, uint32_t color) {
     color_buffer[(window_width * y) + x] = color;
 }
 
-void draw_line(vec2_t point1, vec2_t point2, uint32_t color) {
-  int delta_x = (point2.x - point1.x);
-  int delta_y = (point2.y - point1.y);
+void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color) {
+  int delta_x = (point2->x - point1->x);
+  int delta_y = (point2->y - point1->y);
 
   //Side length will check which side is the longest 
   int side_length = (abs(delta_x) >= abs(delta_y))   ? abs(delta_x) : abs(delta_y);
@@ -65,8 +65,8 @@ void draw_line(vec2_t point1, vec2_t point2, uint32_t color) {
   float x_inc = delta_x / (float)side_length;
   float y_inc = delta_y / (float)side_length;
 
-  float current_x = point1.x;
-  float current_y = point1.y;
+  float current_x = point1->x;
+  float current_y = point1->y;
 
   for(size_t i = 0; i <= side_length; i++) {
     draw_pixel(round(current_x), round(current_y), color);
@@ -75,10 +75,10 @@ void draw_line(vec2_t point1, vec2_t point2, uint32_t color) {
   }
 }
 
-void draw_triangle(triangle_t triangle, uint32_t color) {
-  draw_line(triangle.points[0], triangle.points[1], color);
-  draw_line(triangle.points[0], triangle.points[2], color);
-  draw_line(triangle.points[1], triangle.points[2], color);
+void draw_triangle(triangle_t* triangle, uint32_t color) {
+  draw_line(&triangle->points[0], &triangle->points[1], color);
+  draw_line(&triangle->points[0], &triangle->points[2], color);
+  draw_line(&triangle->points[1], &triangle->points[2], color);
 }
 
 void draw_rect(int x, int y, int width, int height, uint32_t color) {

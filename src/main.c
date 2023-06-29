@@ -43,7 +43,6 @@ int main(int argc, char* argv[]){
   return 0;
 }
 
-
 void setup(void) {
   color_buffer = malloc(sizeof(uint32_t) * window_width * window_height);
   assert(color_buffer && "Memory could not be allocated for the color buffer.\n");
@@ -170,16 +169,23 @@ void render(void){
   //draw_grid(0xFFFFFFFF);
 
   //Render all the projected points
-  int num_triangles = array_length(triangles_to_render);
-  for(size_t i = 0; i < num_triangles; i++) {
-    triangle_t triangle =  triangles_to_render[i];
-    draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, mesh_color);
-    draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, mesh_color);
-    draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, mesh_color);
+  // int num_triangles = array_length(triangles_to_render);
+  // for(size_t i = 0; i < num_triangles; i++) {
+  //   triangle_t triangle =  triangles_to_render[i];
+  //   draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, mesh_color);
+  //   draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, mesh_color);
+  //   draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, mesh_color);
 
-    draw_triangle(triangle, mesh_color);
-  }
+  //   draw_triangle(&triangle, mesh_color);
+  // }
 
+  triangle_t test_triangle;
+  test_triangle.points[0].x = 300; test_triangle.points[0].y = 100;
+  test_triangle.points[1].x =  50; test_triangle.points[1].y = 400;
+  test_triangle.points[2].x = 500; test_triangle.points[2].y = 700;
+
+  draw_triangle(&test_triangle, mesh_color);
+  
   array_free(triangles_to_render);
 
   render_color_buffer();

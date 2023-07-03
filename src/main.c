@@ -16,6 +16,9 @@ uint32_t vertex_color = 0xFFFF0000;
 float fov_factor = 640;
 
 bool is_running = false;
+bool show_wireframe = false;
+bool show_solid = false;
+bool show_vertex = false;
 bool enable_face_culling = true;
 int previous_frame_time = 0;
 float delta_time = 0.0f;
@@ -80,15 +83,15 @@ void process_input(void) {
           break;
 
         case SDLK_1:
-          render_mode = WIREFRAME_VERTEX;
+          show_vertex = !show_vertex;
           break;
 
         case SDLK_2:
-          render_mode = WIREFRAME;
+          show_wireframe = !show_wireframe;
           break;
 
         case SDLK_3:
-          render_mode = SOLID_OBJECT;
+          show_solid = !show_solid;
           break;
 
         case SDLK_4:
@@ -199,28 +202,20 @@ void render(void) {
   int num_triangles = array_length(triangles_to_render);
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
-    switch(render_mode) {
-      case WIREFRAME_VERTEX:
-          draw_triangle(&triangle, wireframe_color);
-          draw_rect(triangle.points[0].x, triangle.points[0].y, 5, 5, vertex_color);
-          draw_rect(triangle.points[1].x, triangle.points[1].y, 5, 5, vertex_color);
-          draw_rect(triangle.points[2].x, triangle.points[2].y, 5, 5, vertex_color);
-        break;
-      
-      case WIREFRAME:
-          draw_triangle(&triangle, wireframe_color);
-        break;
-
-      case SOLID_OBJECT:
-          draw_filled_triangle(&triangle, mesh_color);
-        break;
-
-      case WIREFRAME_SOLID:
-          draw_filled_triangle(&triangle, mesh_color);
-          draw_triangle(&triangle, wireframe_color);
-        break;
-
+    if(show_solid) {
+      draw_filled_triangle(&triangle, mesh_color);
     }
+
+    if(show_wireframe) {
+      draw_triangle(&triangle, wireframe_color);
+    }
+
+    if(show_vertex) {
+      draw_rect(triangle.points[0].x, triangle.points[0].y, 5, 5, vertex_color);
+      draw_rect(triangle.points[1].x, triangle.points[1].y, 5, 5, vertex_color);
+      draw_rect(triangle.points[2].x, triangle.points[2].y, 5, 5, vertex_color);
+    }
+    
   }
   
   array_free(triangles_to_render);

@@ -15,8 +15,8 @@ typedef struct {
 
 } triangle_t;
 
-void draw_filled_triangle(vec2_t* point0, vec2_t* point1, vec2_t* point2, uint32_t color);
+void draw_filled_triangle(triangle_t* triangle, uint32_t color);
 vec2_t calculate_triangle_midpoint(vec2_t* point0, vec2_t* point1, vec2_t* point);
-void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint);
-void fill_flat_top_triangle(vec2_t* point0, vec2_t* midpoint, vec2_t* point2);
+void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint, uint32_t color);
+void fill_flat_top_triangle(vec2_t* point0, vec2_t* midpoint, vec2_t* point2, uint32_t color);
 void int_swap(int* a, int* b);

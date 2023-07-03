@@ -9,7 +9,7 @@
 #include "Mesh/mesh.h"
 
 triangle_t* triangles_to_render = NULL;
-uint32_t mesh_color = 0xFFFF0000;
+uint32_t mesh_color = 0xFFFFFFFF;
 
 float fov_factor = 640;
 
@@ -56,7 +56,7 @@ void setup(void) {
   );
 
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/sphere.obj");
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
 }
 
 void process_input(void) {
@@ -71,6 +71,8 @@ void process_input(void) {
     case SDL_KEYDOWN:
       if(event.key.keysym.sym == SDLK_ESCAPE)
         is_running = false;
+
+      
       break;
   }
 }
@@ -165,26 +167,14 @@ void update(void) {
   }
 }
 
-void render(void){
-  //draw_grid(0xFFFFFFFF);
-
+void render(void) {
   //Render all the projected points
-  // int num_triangles = array_length(triangles_to_render);
-  // for(size_t i = 0; i < num_triangles; i++) {
-  //   triangle_t triangle =  triangles_to_render[i];
-  //   draw_rect(triangle.points[0].x, triangle.points[0].y, 4, 4, mesh_color);
-  //   draw_rect(triangle.points[1].x, triangle.points[1].y, 4, 4, mesh_color);
-  //   draw_rect(triangle.points[2].x, triangle.points[2].y, 4, 4, mesh_color);
-
-  //   draw_triangle(&triangle, mesh_color);
-  // }
-
-  triangle_t test_triangle;
-  test_triangle.points[0].x = 300; test_triangle.points[0].y = 100;
-  test_triangle.points[1].x =  50; test_triangle.points[1].y = 400;
-  test_triangle.points[2].x = 500; test_triangle.points[2].y = 700;
-
-  draw_triangle(&test_triangle, mesh_color);
+  int num_triangles = array_length(triangles_to_render);
+  for(size_t i = 0; i < num_triangles; i++) {
+    triangle_t triangle =  triangles_to_render[i];
+    draw_filled_triangle(&triangle, mesh_color);
+    draw_triangle(&triangle, 0XFF000000);
+  }
   
   array_free(triangles_to_render);
 

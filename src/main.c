@@ -16,7 +16,7 @@ uint32_t vertex_color = 0xFFFF0000;
 float fov_factor = 640;
 
 bool is_running = false;
-bool show_wireframe = false;
+bool show_wireframe = true;
 bool show_solid = false;
 bool show_vertex = false;
 bool enable_face_culling = true;
@@ -101,6 +101,30 @@ void process_input(void) {
         case SDLK_c:
           enable_face_culling = !enable_face_culling;
           break;
+
+        // case SDLK_a:
+        //   mesh.rotation.y -= 0.5 * delta_time;
+        //   break;
+
+        // case SDLK_d:
+        //   mesh.rotation.y += 0.5 * delta_time;
+        //   break;
+
+        // case SDLK_w:
+        //   mesh.rotation.x -= 0.5 * delta_time;
+        //   break;
+
+        // case SDLK_s:
+        //   mesh.rotation.x += 0.5 * delta_time;
+        //   break;
+
+        // case SDLK_q:
+        //   mesh.rotation.z -= 0.5 * delta_time;
+        //   break;
+
+        // case SDLK_e:
+        //   mesh.rotation.z += 0.5 * delta_time;
+        //   break;
       }
       
       break;
@@ -155,30 +179,32 @@ void update(void) {
       transformed_vertices[j] = transformed_vertex;
     }
 
-    //Check backface culling before projecting
-    vec3_t vector_a = transformed_vertices[0];/*    A    */
-    vec3_t vector_b = transformed_vertices[1];/*   / \   */
-    vec3_t vector_c = transformed_vertices[2];/*  C---B  */
+    if(enable_face_culling) {
+      //Check backface culling before projecting
+      vec3_t vector_a = transformed_vertices[0];/*    A    */
+      vec3_t vector_b = transformed_vertices[1];/*   / \   */
+      vec3_t vector_c = transformed_vertices[2];/*  C---B  */
 
-    vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
-    vec3_normalize(&vector_ab);
-    vec3_t vector_ac = vec3_sub(&vector_c, &vector_a); //C-A vector
-    vec3_normalize(&vector_ac);
+      vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
+      vec3_normalize(&vector_ab);
+      vec3_t vector_ac = vec3_sub(&vector_c, &vector_a); //C-A vector
+      vec3_normalize(&vector_ac);
 
-    //Compute face normal (left handed system)
-    vec3_t normal = vec3_cross(&vector_ab, &vector_ac);
+      //Compute face normal (left handed system)
+      vec3_t normal = vec3_cross(&vector_ab, &vector_ac);
 
-    //Normalize the face normal vector
-    vec3_normalize(&normal);
+      //Normalize the face normal vector
+      vec3_normalize(&normal);
 
-    //Find the vector between the camera position and point A
-    vec3_t camera_ray = vec3_sub(&camera_position, &vector_a);
+      //Find the vector between the camera position and point A
+      vec3_t camera_ray = vec3_sub(&camera_position, &vector_a);
 
-    //Calculate how aligned the normal is with the camera ray 
-    float dot_normal_camera = vec3_dot(&normal, &camera_ray);
+      //Calculate how aligned the normal is with the camera ray 
+      float dot_normal_camera = vec3_dot(&normal, &camera_ray);
 
-    if(dot_normal_camera < 0 && enable_face_culling) {
-      continue;
+      if(dot_normal_camera < 0) {
+        continue;
+      }
     }
 
     for(size_t j = 0; j < 3; j++) {
@@ -211,9 +237,9 @@ void render(void) {
     }
 
     if(show_vertex) {
-      draw_rect(triangle.points[0].x, triangle.points[0].y, 5, 5, vertex_color);
-      draw_rect(triangle.points[1].x, triangle.points[1].y, 5, 5, vertex_color);
-      draw_rect(triangle.points[2].x, triangle.points[2].y, 5, 5, vertex_color);
+      draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, vertex_color);
+      draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, vertex_color);
+      draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, vertex_color);
     }
     
   }

@@ -10,14 +10,19 @@
 
 triangle_t* triangles_to_render = NULL;
 uint32_t mesh_color = 0xFFFFFFFF;
+uint32_t wireframe_color = 0xFF0000FF;
+uint32_t vertex_color = 0xFFFF0000;
 
 float fov_factor = 640;
 
 bool is_running = false;
+bool enable_face_culling = true;
 int previous_frame_time = 0;
 float delta_time = 0.0f;
 
 vec3_t camera_position = { 0, 0, 0 };
+
+enum render_modes render_mode = SOLID_OBJECT;
 
 void setup(void);
 void process_input(void);
@@ -63,15 +68,37 @@ void process_input(void) {
   SDL_Event event;
   SDL_PollEvent(&event);
 
-  switch(event.type){
+  switch(event.type) {
     case SDL_QUIT:
       is_running = false;
       break;
     
     case SDL_KEYDOWN:
-      if(event.key.keysym.sym == SDLK_ESCAPE)
-        is_running = false;
+      switch(event.key.keysym.sym) {
+        case SDLK_ESCAPE:
+          is_running = false;
+          break;
 
+        case SDLK_1:
+          render_mode = WIREFRAME_VERTEX;
+          break;
+
+        case SDLK_2:
+          render_mode = WIREFRAME;
+          break;
+
+        case SDLK_3:
+          render_mode = SOLID_OBJECT;
+          break;
+
+        case SDLK_4:
+          render_mode = WIREFRAME_SOLID;
+          break;
+
+        case SDLK_c:
+          enable_face_culling = !enable_face_culling;
+          break;
+      }
       
       break;
   }
@@ -147,7 +174,7 @@ void update(void) {
     //Calculate how aligned the normal is with the camera ray 
     float dot_normal_camera = vec3_dot(&normal, &camera_ray);
 
-    if(dot_normal_camera < 0) {
+    if(dot_normal_camera < 0 && enable_face_culling) {
       continue;
     }
 
@@ -172,8 +199,28 @@ void render(void) {
   int num_triangles = array_length(triangles_to_render);
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
-    draw_filled_triangle(&triangle, mesh_color);
-    draw_triangle(&triangle, 0XFF000000);
+    switch(render_mode) {
+      case WIREFRAME_VERTEX:
+          draw_triangle(&triangle, wireframe_color);
+          draw_rect(triangle.points[0].x, triangle.points[0].y, 5, 5, vertex_color);
+          draw_rect(triangle.points[1].x, triangle.points[1].y, 5, 5, vertex_color);
+          draw_rect(triangle.points[2].x, triangle.points[2].y, 5, 5, vertex_color);
+        break;
+      
+      case WIREFRAME:
+          draw_triangle(&triangle, wireframe_color);
+        break;
+
+      case SOLID_OBJECT:
+          draw_filled_triangle(&triangle, mesh_color);
+        break;
+
+      case WIREFRAME_SOLID:
+          draw_filled_triangle(&triangle, mesh_color);
+          draw_triangle(&triangle, wireframe_color);
+        break;
+
+    }
   }
   
   array_free(triangles_to_render);

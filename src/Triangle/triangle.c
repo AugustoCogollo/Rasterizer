@@ -72,7 +72,7 @@ void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, ui
     float x_start = point2->x;
     float x_end = point2->x;
 
-    //float max_width = fabsf(midpoint->x - point1->x);
+    float max_width = fabsf(midpoint->x - point1->x);
     for(size_t y = point2->y; y >= midpoint->y; y--) {
         vec2_t point_start = { x_start, y };
         vec2_t point_end = { x_end, y };
@@ -80,7 +80,10 @@ void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, ui
         x_start -= inverse_slope_start;
         x_end -= inverse_slope_end;
 
-        
+        if(fabsf(x_end - x_start) > max_width){
+            x_start = point1->x;
+            x_end = midpoint->x;
+        }
     }
 }
 

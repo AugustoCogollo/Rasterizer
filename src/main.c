@@ -7,11 +7,10 @@
 #include "Display/display.h"
 #include "Vectors/vector.h"
 #include "Mesh/mesh.h"
+#include "Settings/settings.h"
+#include "Colors/color.h"
 
 triangle_t* triangles_to_render = NULL;
-uint32_t mesh_color = 0xFFFFFFFF;
-uint32_t wireframe_color = 0xFF0000FF;
-uint32_t vertex_color = 0xFFFF0000;
 
 float fov_factor = 640;
 
@@ -24,8 +23,6 @@ int previous_frame_time = 0;
 float delta_time = 0.0f;
 
 vec3_t camera_position = { 0, 0, 0 };
-
-enum render_modes render_mode = SOLID_OBJECT;
 
 void setup(void);
 void process_input(void);
@@ -63,8 +60,57 @@ void setup(void) {
     window_height
   );
 
-  //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
+  triangle_t* test_triangles = NULL;
+
+  triangle_t a = {
+    .points[0] = {1, 2},
+    .points[1] = {3, 4},
+    .points[2] = {5, 6},
+    .avg_depth = 1,
+  }; array_push(test_triangles, a);
+
+  triangle_t b = {
+    .points = {
+     {7, 8},
+     {9, 10},
+     {11, 12} },  
+    .avg_depth = 2,
+  }; array_push(test_triangles, b);
+
+  triangle_t c = {
+    .points = {
+     {13, 14},
+     {15, 16},
+     {17, 18} },  
+    .avg_depth = 3,
+  }; array_push(test_triangles, c);
+
+  triangle_t d = {
+    .points = {
+     {19, 20},
+     {21, 22},
+     {23, 24} },  
+    .avg_depth = 4,
+  }; array_push(test_triangles, d);
+
+  int temp = 0;
+  printf("Triangle A: %f, %f | Triangle B: %f, %f | Triangle C: %f, %f | Triangle D: %f, %f\n", 
+            test_triangles[0].points[temp].x, test_triangles[0].points[temp].y, 
+            test_triangles[1].points[temp].x, test_triangles[1].points[temp].y,
+            test_triangles[2].points[temp].x, test_triangles[2].points[temp].y,
+            test_triangles[3].points[temp].x, test_triangles[3].points[temp].y
+        );
+  triangle_descending_bubble_sort(test_triangles);
+  printf("Triangle A: %f, %f | Triangle B: %f, %f | Triangle C: %f, %f | Triangle D: %f, %f\n", 
+          test_triangles[0].points[temp].x, test_triangles[0].points[temp].y, 
+          test_triangles[1].points[temp].x, test_triangles[1].points[temp].y,
+          test_triangles[2].points[temp].x, test_triangles[2].points[temp].y,
+          test_triangles[3].points[temp].x, test_triangles[3].points[temp].y
+        );  
+    array_free(test_triangles);
+
+  load_cube_mesh_data();
+  //load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
 }
 
 void process_input(void) {
@@ -92,10 +138,6 @@ void process_input(void) {
 
         case SDLK_3:
           show_solid = !show_solid;
-          break;
-
-        case SDLK_4:
-          render_mode = WIREFRAME_SOLID;
           break;
 
         case SDLK_c:
@@ -164,8 +206,6 @@ void update(void) {
     face_vertices[1] = mesh.vertices[mesh_face.b - 1];
     face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-    triangle_t projected_triangle;
-
     vec3_t transformed_vertices[3];
     
     for(size_t j = 0; j < 3; j++) {
@@ -207,20 +247,35 @@ void update(void) {
       }
     }
 
+    vec2_t projected_points[3];
+
     for(size_t j = 0; j < 3; j++) {
 
-      vec2_t projected_point = project(&transformed_vertices[j]);
+      projected_points[j] = project(&transformed_vertices[j]);
 
       //Scale and transform the projected points to the middle of the screen
-      projected_point.x += (window_width / 2);
-      projected_point.y += (window_height / 2);
-
-      projected_triangle.points[j] = projected_point;
+      projected_points[j].x += (window_width / 2);
+      projected_points[j].y += (window_height / 2);
     }
 
-    array_push(triangles_to_render, projected_triangle);
+    //Calculate the average depth of the triangle vertices after transformation
+    float depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
 
+    triangle_t projected_triangle = {
+      .points = {
+        { projected_points[0].x, projected_points[0].y },
+        { projected_points[1].x, projected_points[1].y },
+        { projected_points[2].x, projected_points[2].y }
+      },
+      .color = mesh_face.color,
+      .avg_depth = depth
+    };
+
+    array_push(triangles_to_render, projected_triangle);
   }
+
+  //TODO: sort triangles according to their depth
+  triangle_descending_bubble_sort(triangles_to_render); 
 }
 
 void render(void) {
@@ -229,25 +284,24 @@ void render(void) {
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
     if(show_solid) {
-      draw_filled_triangle(&triangle, mesh_color);
+      draw_filled_triangle(&triangle, triangle.color.value);
     }
 
     if(show_wireframe) {
-      draw_triangle(&triangle, wireframe_color);
+      draw_triangle(&triangle, color_green.value);
     }
 
     if(show_vertex) {
-      draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, vertex_color);
-      draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, vertex_color);
-      draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, vertex_color);
+      draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, color_red.value);
+      draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, color_red.value);
+      draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, color_red.value);
     }
-    
   }
   
   array_free(triangles_to_render);
 
   render_color_buffer();
-  clear_color_buffer(0xFF000000);
+  clear_color_buffer(color_black.value);
 
   SDL_RenderPresent(renderer);
 }

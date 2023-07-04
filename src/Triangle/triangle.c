@@ -1,4 +1,5 @@
 #include "triangle.h"
+#include "../DArray/array.h"
 #include "../Display/display.h"
 
 void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
@@ -85,6 +86,28 @@ void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, ui
             x_end = midpoint->x;
         }
     }
+}
+
+void triangle_descending_bubble_sort(triangle_t* triangles) {
+    int size = array_length(triangles);
+    for(size_t step = 0; step < size; step++) {
+        for(size_t j = 0; j < size - step; j++) {
+            if(j + 1 >= size){
+                //printf("Reached limit of the array at %d", size);
+                break;
+            }
+
+            if(triangles[j].avg_depth < triangles[j + 1].avg_depth){
+                triangle_swap(&triangles[j], &triangles[j + 1]);
+            }
+        }
+    }
+}
+
+void triangle_swap(triangle_t* a, triangle_t* b) {
+    triangle_t temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
 void int_swap(int* a, int* b) {

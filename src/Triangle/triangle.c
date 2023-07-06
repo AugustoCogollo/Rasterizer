@@ -93,7 +93,6 @@ void triangle_descending_bubble_sort(triangle_t* triangles) {
     for(size_t step = 0; step < size; step++) {
         for(size_t j = 0; j < size - step; j++) {
             if(j + 1 >= size){
-                //printf("Reached limit of the array at %d", size);
                 break;
             }
 

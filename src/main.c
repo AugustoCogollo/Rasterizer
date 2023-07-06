@@ -9,6 +9,7 @@
 #include "Mesh/mesh.h"
 #include "Settings/settings.h"
 #include "Colors/color.h"
+#include "Matrix/matrix.h"
 
 triangle_t* triangles_to_render = NULL;
 
@@ -59,55 +60,6 @@ void setup(void) {
     window_width,
     window_height
   );
-
-  triangle_t* test_triangles = NULL;
-
-  triangle_t a = {
-    .points[0] = {1, 2},
-    .points[1] = {3, 4},
-    .points[2] = {5, 6},
-    .avg_depth = 1,
-  }; array_push(test_triangles, a);
-
-  triangle_t b = {
-    .points = {
-     {7, 8},
-     {9, 10},
-     {11, 12} },  
-    .avg_depth = 2,
-  }; array_push(test_triangles, b);
-
-  triangle_t c = {
-    .points = {
-     {13, 14},
-     {15, 16},
-     {17, 18} },  
-    .avg_depth = 3,
-  }; array_push(test_triangles, c);
-
-  triangle_t d = {
-    .points = {
-     {19, 20},
-     {21, 22},
-     {23, 24} },  
-    .avg_depth = 4,
-  }; array_push(test_triangles, d);
-
-  int temp = 0;
-  printf("Triangle A: %f, %f | Triangle B: %f, %f | Triangle C: %f, %f | Triangle D: %f, %f\n", 
-            test_triangles[0].points[temp].x, test_triangles[0].points[temp].y, 
-            test_triangles[1].points[temp].x, test_triangles[1].points[temp].y,
-            test_triangles[2].points[temp].x, test_triangles[2].points[temp].y,
-            test_triangles[3].points[temp].x, test_triangles[3].points[temp].y
-        );
-  triangle_descending_bubble_sort(test_triangles);
-  printf("Triangle A: %f, %f | Triangle B: %f, %f | Triangle C: %f, %f | Triangle D: %f, %f\n", 
-          test_triangles[0].points[temp].x, test_triangles[0].points[temp].y, 
-          test_triangles[1].points[temp].x, test_triangles[1].points[temp].y,
-          test_triangles[2].points[temp].x, test_triangles[2].points[temp].y,
-          test_triangles[3].points[temp].x, test_triangles[3].points[temp].y
-        );  
-    array_free(test_triangles);
 
   load_cube_mesh_data();
   //load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
@@ -198,6 +150,18 @@ void update(void) {
   mesh.rotation.y += 0.5 * delta_time;
   mesh.rotation.z += 0.5 * delta_time;
 
+  // mesh.scale.x += 0.2 * delta_time;
+  // mesh.scale.y += 0.2 * delta_time;
+
+  //mesh.translation.x += 0.5 * delta_time;
+  mesh.translation.z = 5.0;
+
+  mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+  mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
+  mat4_t rotation_matrix_x = mat4_make_rotation_x(mesh.rotation.x);
+  mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
+  mat4_t rotation_matrix_z = mat4_make_rotation_z(mesh.rotation.z);
+
   int num_faces = array_length(mesh.vertex_faces);
   for(size_t i = 0; i < num_faces; i++) {
     face_t mesh_face = mesh.vertex_faces[i];
@@ -206,13 +170,19 @@ void update(void) {
     face_vertices[1] = mesh.vertices[mesh_face.b - 1];
     face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-    vec3_t transformed_vertices[3];
+    vec4_t transformed_vertices[3];
     
     for(size_t j = 0; j < 3; j++) {
-      vec3_t transformed_vertex = face_vertices[j];
-      transformed_vertex = vec3_rotate_x(&transformed_vertex, mesh.rotation.x);
-      transformed_vertex = vec3_rotate_y(&transformed_vertex, mesh.rotation.y);
-      transformed_vertex = vec3_rotate_z(&transformed_vertex, mesh.rotation.z);
+      vec4_t transformed_vertex = vec4_from_vec3(&face_vertices[j]);
+
+      //Scale the vertex
+      transformed_vertex = mat4_mult_vec4(&scale_matrix, &transformed_vertex);
+      //Rotate the vertex
+      transformed_vertex = mat4_mult_vec4(&rotation_matrix_x, &transformed_vertex);
+      transformed_vertex = mat4_mult_vec4(&rotation_matrix_y, &transformed_vertex);
+      transformed_vertex = mat4_mult_vec4(&rotation_matrix_z, &transformed_vertex);
+      //Translate the vertex
+      transformed_vertex = mat4_mult_vec4(&translation_matrix, &transformed_vertex);
 
       //Translate the vertex away from the camera
       transformed_vertex.z += 5;
@@ -221,9 +191,9 @@ void update(void) {
 
     if(enable_face_culling) {
       //Check backface culling before projecting
-      vec3_t vector_a = transformed_vertices[0];/*    A    */
-      vec3_t vector_b = transformed_vertices[1];/*   / \   */
-      vec3_t vector_c = transformed_vertices[2];/*  C---B  */
+      vec3_t vector_a = vec3_from_vec4(&transformed_vertices[0]);/*    A    */
+      vec3_t vector_b = vec3_from_vec4(&transformed_vertices[1]);/*   / \   */
+      vec3_t vector_c = vec3_from_vec4(&transformed_vertices[2]);/*  C---B  */
 
       vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
       vec3_normalize(&vector_ab);
@@ -250,8 +220,8 @@ void update(void) {
     vec2_t projected_points[3];
 
     for(size_t j = 0; j < 3; j++) {
-
-      projected_points[j] = project(&transformed_vertices[j]);
+      vec3_t point_to_be_projected = vec3_from_vec4(&transformed_vertices[j]);
+      projected_points[j] = project(&point_to_be_projected);
 
       //Scale and transform the projected points to the middle of the screen
       projected_points[j].x += (window_width / 2);
@@ -259,7 +229,7 @@ void update(void) {
     }
 
     //Calculate the average depth of the triangle vertices after transformation
-    float depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
+    float depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z);
 
     triangle_t projected_triangle = {
       .points = {
@@ -274,7 +244,7 @@ void update(void) {
     array_push(triangles_to_render, projected_triangle);
   }
 
-  //TODO: sort triangles according to their depth
+  //Sort triangles according to their depth
   triangle_descending_bubble_sort(triangles_to_render); 
 }
 

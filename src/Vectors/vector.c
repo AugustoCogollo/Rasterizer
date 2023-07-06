@@ -136,3 +136,13 @@ void vec3_swap(vec3_t* a, vec3_t* b) {
     *a = *b;
     *b = temp;
 }
+
+vec4_t vec4_from_vec3(vec3_t* vector) {
+    vec4_t new_vector = { vector->x, vector->y, vector->z, 1.0 };
+    return new_vector;
+}
+
+vec3_t vec3_from_vec4(vec4_t* vector) {
+    vec3_t new_vector = { vector->x, vector->y, vector->z };
+    return new_vector;
+}

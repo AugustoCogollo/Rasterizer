@@ -150,17 +150,27 @@ void update(void) {
   mesh.rotation.y += 0.5 * delta_time;
   mesh.rotation.z += 0.5 * delta_time;
 
-  // mesh.scale.x += 0.2 * delta_time;
-  // mesh.scale.y += 0.2 * delta_time;
+  mesh.scale.x += 0.2 * delta_time;
+  mesh.scale.y += 0.2 * delta_time;
+  mesh.scale.z += 0.2 * delta_time;
 
-  //mesh.translation.x += 0.5 * delta_time;
-  mesh.translation.z = 5.0;
+  mesh.translation.x += 0.5 * delta_time;
+  mesh.translation.z = 10.0;
+
+  mat4_t world_matrix = mat4_identity();
 
   mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
-  mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
-  mat4_t rotation_matrix_x = mat4_make_rotation_x(mesh.rotation.x);
-  mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
+  world_matrix = mat4_mult_mat4(&scale_matrix, &world_matrix);
+
   mat4_t rotation_matrix_z = mat4_make_rotation_z(mesh.rotation.z);
+  world_matrix = mat4_mult_mat4(&rotation_matrix_z, &world_matrix);
+  mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
+  world_matrix = mat4_mult_mat4(&rotation_matrix_y, &world_matrix);
+  mat4_t rotation_matrix_x = mat4_make_rotation_x(mesh.rotation.x);
+  world_matrix = mat4_mult_mat4(&rotation_matrix_x, &world_matrix);
+
+  mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
+  world_matrix = mat4_mult_mat4(&translation_matrix, &world_matrix);
 
   int num_faces = array_length(mesh.vertex_faces);
   for(size_t i = 0; i < num_faces; i++) {
@@ -175,17 +185,9 @@ void update(void) {
     for(size_t j = 0; j < 3; j++) {
       vec4_t transformed_vertex = vec4_from_vec3(&face_vertices[j]);
 
-      //Scale the vertex
-      transformed_vertex = mat4_mult_vec4(&scale_matrix, &transformed_vertex);
-      //Rotate the vertex
-      transformed_vertex = mat4_mult_vec4(&rotation_matrix_x, &transformed_vertex);
-      transformed_vertex = mat4_mult_vec4(&rotation_matrix_y, &transformed_vertex);
-      transformed_vertex = mat4_mult_vec4(&rotation_matrix_z, &transformed_vertex);
-      //Translate the vertex
-      transformed_vertex = mat4_mult_vec4(&translation_matrix, &transformed_vertex);
+      transformed_vertex = mat4_mult_vec4(&world_matrix, &transformed_vertex);
 
       //Translate the vertex away from the camera
-      transformed_vertex.z += 5;
       transformed_vertices[j] = transformed_vertex;
     }
 

@@ -21,6 +21,16 @@ vec4_t mat4_mult_vec4(mat4_t* matrix, vec4_t* vector) {
     return new_vector;
 }
 
+mat4_t mat4_mult_mat4(mat4_t* a, mat4_t* b) {
+    mat4_t new_matrix;
+    for(size_t y = 0; y < 4; y++) {
+        for(size_t x = 0; x < 4; x++) {
+            new_matrix.m[y][x] = (a->m[y][0] * b->m[0][x]) + (a->m[y][1] * b->m[1][x]) + (a->m[y][2] * b->m[2][x]) + (a->m[y][3] * b->m[3][x]);
+        }
+    }
+    return new_matrix;
+}
+
 mat4_t mat4_make_scale(float sx, float sy, float sz) {
     mat4_t mat_scale = mat4_identity();
     mat_scale.m[0][0] = sx;

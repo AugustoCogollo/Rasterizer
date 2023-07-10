@@ -82,3 +82,25 @@ mat4_t mat4_make_rotation_z(float angle) {
     mat_rotation_z.m[1][1] =  cosine;
     return mat_rotation_z;
 }
+
+mat4_t mat4_make_perspective(float fov, float aspect, float znear, float zfar) {
+    mat4_t mat_perspective = {{{0}}};
+    mat_perspective.m[0][0] = aspect * (1.0 / (fov * 0.5f));
+    mat_perspective.m[1][1] = 1.0f / (fov * 0.5f);
+    mat_perspective.m[2][2] = zfar / (zfar - znear);
+    mat_perspective.m[2][3] = (-zfar * znear) / (zfar - znear);
+    mat_perspective.m[3][2] = 1.0;
+
+    return mat_perspective;
+}
+
+vec4_t mat4_mul_vec4_project(mat4_t* mat_proj, vec4_t* vector) {
+    vec4_t result = mat4_mult_vec4(mat_proj, vector);
+
+    if(result.w != 0.0) {
+        result.x /= result.w;
+        result.y /= result.w;
+        result.z /= result.w;
+    }
+    return result;
+}

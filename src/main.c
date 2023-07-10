@@ -11,6 +11,8 @@
 #include "Colors/color.h"
 #include "Matrix/matrix.h"
 
+#define PI 3.14159265358979323846
+
 triangle_t* triangles_to_render = NULL;
 
 float fov_factor = 640;
@@ -24,6 +26,7 @@ int previous_frame_time = 0;
 float delta_time = 0.0f;
 
 vec3_t camera_position = { 0, 0, 0 };
+mat4_t projection_matrix;
 
 void setup(void);
 void process_input(void);
@@ -34,7 +37,7 @@ void free_resources(void);
 
 int main(int argc, char* argv[]){
   is_running = initialize_window();
-
+  
   setup();
 
   while(is_running){
@@ -60,9 +63,16 @@ void setup(void) {
     window_width,
     window_height
   );
+  
+  //Initialize the perspective matrix
+  float fov = PI / 3;
+  float aspect = (float)window_height / (float)window_width;
+  float znear = 0.1;
+  float zfar = 100;
+  projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   load_cube_mesh_data();
-  //load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
+  //load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
 }
 
 void process_input(void) {
@@ -146,16 +156,16 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  mesh.rotation.x += 0.5 * delta_time;
+  //mesh.rotation.x += 0.5 * delta_time;
   mesh.rotation.y += 0.5 * delta_time;
-  mesh.rotation.z += 0.5 * delta_time;
+  // mesh.rotation.z += 0.5 * delta_time;
 
-  mesh.scale.x += 0.2 * delta_time;
-  mesh.scale.y += 0.2 * delta_time;
-  mesh.scale.z += 0.2 * delta_time;
+  // mesh.scale.x += 0.2 * delta_time;
+  // mesh.scale.y += 0.2 * delta_time;
+  // mesh.scale.z += 0.2 * delta_time;
 
-  mesh.translation.x += 0.5 * delta_time;
-  mesh.translation.z = 10.0;
+  // mesh.translation.x += 0.5 * delta_time;
+  mesh.translation.z = 5.0;
 
   mat4_t world_matrix = mat4_identity();
 
@@ -219,15 +229,19 @@ void update(void) {
       }
     }
 
-    vec2_t projected_points[3];
+    vec4_t projected_points[3];
 
     for(size_t j = 0; j < 3; j++) {
-      vec3_t point_to_be_projected = vec3_from_vec4(&transformed_vertices[j]);
-      projected_points[j] = project(&point_to_be_projected);
+      projected_points[j] = mat4_mul_vec4_project(&projection_matrix, &transformed_vertices[j]);
 
-      //Scale and transform the projected points to the middle of the screen
-      projected_points[j].x += (window_width / 2);
-      projected_points[j].y += (window_height / 2);
+      //Scale the projected points 
+      projected_points[j].x *= window_width / 2.0;
+      projected_points[j].y *= window_height / 2.0;
+
+      //Translate the projected points to the middle of the screen
+      projected_points[j].x += (window_width / 2.0);
+      projected_points[j].y += (window_height / 2.0);
+
     }
 
     //Calculate the average depth of the triangle vertices after transformation
@@ -260,7 +274,7 @@ void render(void) {
     }
 
     if(show_wireframe) {
-      draw_triangle(&triangle, color_green.value);
+      draw_triangle(&triangle, BLANCHED_ALMOND);
     }
 
     if(show_vertex) {

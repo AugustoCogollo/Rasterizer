@@ -14,7 +14,7 @@
 
 #define PI 3.14159265358979323846
 
-light_t global_light = {{ 0.0, 20.0, 10.0 }};
+light_t global_light = {{ 0.0, -20.0, 5.0 }};
 
 triangle_t* triangles_to_render = NULL;
 
@@ -160,12 +160,10 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  //mesh.rotation.x += 0.5 * delta_time;
+  mesh.rotation.x += 0.5 * delta_time;
   mesh.rotation.y += 0.5 * delta_time;
-  //mesh.rotation.z += 0.5 * delta_time;
-  mesh.rotation.z = 3.15f;
-
-  //mesh.rotation.z = 270;
+  mesh.rotation.z += 0.5 * delta_time;
+  //mesh.rotation.z = 3.15f;
 
   // mesh.scale.x += 0.2 * delta_time;
   // mesh.scale.y += 0.2 * delta_time;
@@ -236,6 +234,7 @@ void update(void) {
       if(show_light) {
         //Calculate how aligned the normal is with the camera ray
         float dot_normal_light = vec3_dot(&normal, &global_light.direction);
+        dot_normal_light = dot_normal_light < 0 ? 0 : dot_normal_light;
         triangle_color = light_apply_intensity(triangle_color, dot_normal_light);
       }
 
@@ -297,8 +296,6 @@ void render(void) {
       draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, color_red.value);
       draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, color_red.value);
     }
-
-    
   }
   
   array_free(triangles_to_render);

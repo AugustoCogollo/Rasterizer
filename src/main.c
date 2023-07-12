@@ -10,18 +10,20 @@
 #include "Settings/settings.h"
 #include "Colors/color.h"
 #include "Matrix/matrix.h"
+#include "Light/light.h"
 
 #define PI 3.14159265358979323846
 
-triangle_t* triangles_to_render = NULL;
+light_t global_light = {{ 0.0, 20.0, 10.0 }};
 
-float fov_factor = 640;
+triangle_t* triangles_to_render = NULL;
 
 bool is_running = false;
 bool show_wireframe = true;
 bool show_solid = false;
 bool show_vertex = false;
 bool enable_face_culling = true;
+bool show_light = false;
 int previous_frame_time = 0;
 float delta_time = 0.0f;
 
@@ -71,8 +73,10 @@ void setup(void) {
   float zfar = 100;
   projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-  load_cube_mesh_data();
-  //load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
+  //load_cube_mesh_data();
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
+
+  vec3_normalize(&global_light.direction);
 }
 
 void process_input(void) {
@@ -88,6 +92,7 @@ void process_input(void) {
       switch(event.key.keysym.sym) {
         case SDLK_ESCAPE:
           is_running = false;
+          printf("Rotation: %f\n", mesh.rotation.z);
           break;
 
         case SDLK_1:
@@ -102,16 +107,22 @@ void process_input(void) {
           show_solid = !show_solid;
           break;
 
+        case SDLK_4:
+          show_light = !show_light;
+          break;
+
         case SDLK_c:
           enable_face_culling = !enable_face_culling;
           break;
 
         // case SDLK_a:
-        //   mesh.rotation.y -= 0.5 * delta_time;
+        //   light_factor += 1;
+        //   printf("%f light factor\n", light_factor);
         //   break;
 
         // case SDLK_d:
-        //   mesh.rotation.y += 0.5 * delta_time;
+        //   light_factor -= 1;
+        //   printf("%f light factor\n", light_factor);
         //   break;
 
         // case SDLK_w:
@@ -135,14 +146,7 @@ void process_input(void) {
   }
 }
 
-vec2_t project(vec3_t* point) {
-  vec2_t projected_point = {
-    .x = (fov_factor * point->x) / point->z,
-    .y = (fov_factor * point->y) / point->z
-  };
 
-  return projected_point;
-}
 
 void update(void) {
   uint32_t time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
@@ -158,14 +162,17 @@ void update(void) {
 
   //mesh.rotation.x += 0.5 * delta_time;
   mesh.rotation.y += 0.5 * delta_time;
-  // mesh.rotation.z += 0.5 * delta_time;
+  //mesh.rotation.z += 0.5 * delta_time;
+  mesh.rotation.z = 3.15f;
+
+  //mesh.rotation.z = 270;
 
   // mesh.scale.x += 0.2 * delta_time;
   // mesh.scale.y += 0.2 * delta_time;
   // mesh.scale.z += 0.2 * delta_time;
 
   // mesh.translation.x += 0.5 * delta_time;
-  mesh.translation.z = 5.0;
+  mesh.translation.z = 5.0;  
 
   mat4_t world_matrix = mat4_identity();
 
@@ -201,6 +208,8 @@ void update(void) {
       transformed_vertices[j] = transformed_vertex;
     }
 
+    uint32_t triangle_color = GRAY;
+
     if(enable_face_culling) {
       //Check backface culling before projecting
       vec3_t vector_a = vec3_from_vec4(&transformed_vertices[0]);/*    A    */
@@ -224,6 +233,12 @@ void update(void) {
       //Calculate how aligned the normal is with the camera ray 
       float dot_normal_camera = vec3_dot(&normal, &camera_ray);
 
+      if(show_light) {
+        //Calculate how aligned the normal is with the camera ray
+        float dot_normal_light = vec3_dot(&normal, &global_light.direction);
+        triangle_color = light_apply_intensity(triangle_color, dot_normal_light);
+      }
+
       if(dot_normal_camera < 0) {
         continue;
       }
@@ -241,7 +256,6 @@ void update(void) {
       //Translate the projected points to the middle of the screen
       projected_points[j].x += (window_width / 2.0);
       projected_points[j].y += (window_height / 2.0);
-
     }
 
     //Calculate the average depth of the triangle vertices after transformation
@@ -253,7 +267,7 @@ void update(void) {
         { projected_points[1].x, projected_points[1].y },
         { projected_points[2].x, projected_points[2].y }
       },
-      .color = mesh_face.color,
+      .color = triangle_color,
       .avg_depth = depth
     };
 
@@ -269,8 +283,9 @@ void render(void) {
   int num_triangles = array_length(triangles_to_render);
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
+
     if(show_solid) {
-      draw_filled_triangle(&triangle, triangle.color.value);
+      draw_filled_triangle(&triangle, triangle.color);
     }
 
     if(show_wireframe) {
@@ -282,6 +297,8 @@ void render(void) {
       draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, color_red.value);
       draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, color_red.value);
     }
+
+    
   }
   
   array_free(triangles_to_render);

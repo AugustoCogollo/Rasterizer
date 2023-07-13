@@ -31,7 +31,6 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
         //Draw flat-top triangle
         fill_flat_top_triangle(&triangle->points[1], &midpoint, &triangle->points[2], color);
     }
-
 }
 
 vec2_t calculate_triangle_midpoint(vec2_t* point0, vec2_t* point1, vec2_t* point2) {

@@ -281,6 +281,12 @@ void render(void) {
   for(size_t i = 0; i < num_triangles; i++) {
     triangle_t triangle =  triangles_to_render[i];
 
+    //Triangle points are rounded so that the model does not have gaps and black lines
+    for(size_t i = 0; i < 3; i++){
+        triangle.points[i].x = roundf(triangle.points[i].x);
+        triangle.points[i].y = roundf(triangle.points[i].y);
+    }
+
     if(show_solid) {
       draw_filled_triangle(&triangle, triangle.color);
     }

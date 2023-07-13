@@ -72,7 +72,6 @@ void load_obj_file(char* filename) {
     char line_copy[1024];
     strcpy(line_copy, line);
     char* token = strtok_r(line_copy, " ", &saveptr);
-    //printf("Token: %s\n", token);
 
     //strncmp can also be used 
     if(strcmp(token, "v") == 0){
@@ -110,6 +109,8 @@ void load_obj_file(char* filename) {
 
         data = strtok_r(NULL, " ", &saveptr_index);
         sscanf(data, "%d/%d/%d", &vertex_face.c, &texture_face.b, &normal_face.c);
+
+        vertex_face.color = 0xFFFFFFFF;
 
         array_push(mesh.vertex_faces, vertex_face);
         array_push(mesh.texture_faces, texture_face);

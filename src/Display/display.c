@@ -43,15 +43,13 @@ bool initialize_window(void) {
   }
 
   return true;
-
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if(x > window_width || y > window_height || x < 0 || y < 0){
+    if(x > window_width || y > window_height || x <= 0 || y <= 0){
       //printf("A pixel could not be drawn at x: %d, y: %d", x, y);
       return;
     }
-
     color_buffer[(window_width * y) + x] = color;
 }
 
@@ -60,8 +58,7 @@ void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color) {
   int delta_y = (point2->y - point1->y);
 
   //Side length will check which side is the longest 
-  int side_length = (abs(delta_x) >= abs(delta_y))   ? abs(delta_x) : abs(delta_y);
-
+  int side_length = (abs(delta_x) >= abs(delta_y)) ? abs(delta_x) : abs(delta_y);
   float x_inc = delta_x / (float)side_length;
   float y_inc = delta_y / (float)side_length;
 
@@ -69,7 +66,7 @@ void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color) {
   float current_y = point1->y;
 
   for(size_t i = 0; i <= side_length; i++) {
-    draw_pixel(round(current_x), round(current_y), color);
+    draw_pixel(roundf(current_x), roundf(current_y), color);
     current_x += x_inc;
     current_y += y_inc;
   }

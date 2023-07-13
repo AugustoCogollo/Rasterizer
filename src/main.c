@@ -14,8 +14,6 @@
 
 #define PI 3.14159265358979323846
 
-light_t global_light = {{ 0.0, -20.0, 5.0 }};
-
 triangle_t* triangles_to_render = NULL;
 
 bool is_running = false;
@@ -92,7 +90,6 @@ void process_input(void) {
       switch(event.key.keysym.sym) {
         case SDLK_ESCAPE:
           is_running = false;
-          printf("Rotation: %f\n", mesh.rotation.z);
           break;
 
         case SDLK_1:
@@ -161,9 +158,8 @@ void update(void) {
   previous_frame_time = SDL_GetTicks();
 
   mesh.rotation.x += 0.5 * delta_time;
-  mesh.rotation.y += 0.5 * delta_time;
-  mesh.rotation.z += 0.5 * delta_time;
-  //mesh.rotation.z = 3.15f;
+  //mesh.rotation.y += 0.5 * delta_time;
+  //mesh.rotation.z += 0.5 * delta_time;
 
   // mesh.scale.x += 0.2 * delta_time;
   // mesh.scale.y += 0.2 * delta_time;
@@ -194,7 +190,7 @@ void update(void) {
     face_vertices[0] = mesh.vertices[mesh_face.a - 1];
     face_vertices[1] = mesh.vertices[mesh_face.b - 1];
     face_vertices[2] = mesh.vertices[mesh_face.c - 1];
-
+    
     vec4_t transformed_vertices[3];
     
     for(size_t j = 0; j < 3; j++) {
@@ -206,7 +202,7 @@ void update(void) {
       transformed_vertices[j] = transformed_vertex;
     }
 
-    uint32_t triangle_color = GRAY;
+    uint32_t triangle_color = mesh_face.color;
 
     if(enable_face_culling) {
       //Check backface culling before projecting
@@ -233,8 +229,7 @@ void update(void) {
 
       if(show_light) {
         //Calculate how aligned the normal is with the camera ray
-        float dot_normal_light = vec3_dot(&normal, &global_light.direction);
-        dot_normal_light = dot_normal_light < 0 ? 0 : dot_normal_light;
+        float dot_normal_light = -vec3_dot(&normal, &global_light.direction);
         triangle_color = light_apply_intensity(triangle_color, dot_normal_light);
       }
 
@@ -251,6 +246,9 @@ void update(void) {
       //Scale the projected points 
       projected_points[j].x *= window_width / 2.0;
       projected_points[j].y *= window_height / 2.0;
+
+      //Invert the y values because of the y flipped screen coordinates
+      projected_points[j].y *= -1;
 
       //Translate the projected points to the middle of the screen
       projected_points[j].x += (window_width / 2.0);
@@ -288,7 +286,7 @@ void render(void) {
     }
 
     if(show_wireframe) {
-      draw_triangle(&triangle, BLANCHED_ALMOND);
+      draw_triangle(&triangle, WHITE);
     }
 
     if(show_vertex) {

@@ -36,7 +36,7 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
 
 vec2_t calculate_triangle_midpoint(vec2_t* point0, vec2_t* point1, vec2_t* point2) {
     vec2_t midpoint = {
-        .x = ( ((point1->y - point0->y) * (point2->x - point0->x)) / (point2->y - point0->y) ) + point0->x,
+        .x = ( ((point2->x - point0->x) * (point1->y - point0->y)) / (point2->y - point0->y) ) + point0->x,
         .y = point1->y
     };
     return midpoint;
@@ -59,7 +59,7 @@ void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint,
         x_end += inverse_slope_end;
 
         //Prevent x_start and x_end from getting out of bounds 
-        if(fabsf(x_end - x_start) > max_width) {
+        if(fabsf(x_end - x_start) >= max_width) {
             x_start = point1->x;
             x_end = midpoint->x;
         }

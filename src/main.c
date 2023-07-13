@@ -11,17 +11,14 @@
 #include "Colors/color.h"
 #include "Matrix/matrix.h"
 #include "Light/light.h"
+#include "Triangle/triangle.h"
+#include "Texture/texture.h"
 
 #define PI 3.14159265358979323846
 
 triangle_t* triangles_to_render = NULL;
 
 bool is_running = false;
-bool show_wireframe = true;
-bool show_solid = false;
-bool show_vertex = false;
-bool enable_face_culling = true;
-bool show_light = false;
 int previous_frame_time = 0;
 float delta_time = 0.0f;
 
@@ -71,6 +68,11 @@ void setup(void) {
   float zfar = 100;
   projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
+  //Load hardcoded texture information
+  mesh_texture = (uint32_t*)REDBRICK_TEXTURE;
+  texture_width = 64;
+  texture_height = 64;
+
   //load_cube_mesh_data();
   load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
 
@@ -106,6 +108,10 @@ void process_input(void) {
 
         case SDLK_4:
           show_light = !show_light;
+          break;
+
+        case SDLK_5:
+          show_textures = !show_textures;
           break;
 
         case SDLK_c:
@@ -264,6 +270,11 @@ void update(void) {
         { projected_points[1].x, projected_points[1].y },
         { projected_points[2].x, projected_points[2].y }
       },
+      .tex_coords = {
+        [0] = mesh_face.a_uv,
+        [1] = mesh_face.b_uv,
+        [2] = mesh_face.c_uv
+      },
       .color = triangle_color,
       .avg_depth = depth
     };
@@ -287,12 +298,16 @@ void render(void) {
         triangle.points[i].y = roundf(triangle.points[i].y);
     }
 
+    if(show_textures) {
+      draw_textured_triangle(&triangle, mesh_texture);
+    }
+
     if(show_solid) {
-      draw_filled_triangle(&triangle, triangle.color);
+      draw_filled_triangle(&triangle);
     }
 
     if(show_wireframe) {
-      draw_triangle(&triangle, WHITE);
+      draw_triangle(&triangle, YELLOW);
     }
 
     if(show_vertex) {

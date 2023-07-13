@@ -8,6 +8,13 @@ SDL_Texture* color_buffer_texture = NULL;
 int window_width = 800;
 int window_height = 600;
 
+bool show_wireframe = true;
+bool show_solid = false;
+bool show_vertex = false;
+bool enable_face_culling = true;
+bool show_light = false;
+bool show_textures = false;
+
 bool initialize_window(void) {
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL. \n");

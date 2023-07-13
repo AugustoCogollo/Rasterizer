@@ -2,7 +2,7 @@
 #include "../DArray/array.h"
 #include "../Display/display.h"
 
-void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
+void draw_filled_triangle(triangle_t* triangle) {
     //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
     if(triangle->points[0].y > triangle->points[1].y){
         vec2_swap(&triangle->points[0], &triangle->points[1]);
@@ -15,10 +15,10 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
     }
 
     if(triangle->points[1].y == triangle->points[2].y) {
-        fill_flat_bottom_triangle(&triangle->points[0], &triangle->points[1], &triangle->points[2], color);
+        fill_flat_bottom_triangle(&triangle->points[0], &triangle->points[1], &triangle->points[2], triangle->color);
     }
     else if(&triangle->points[0].y == &triangle->points[1].y) {
-        fill_flat_top_triangle(&triangle->points[0], &triangle->points[1], &triangle->points[2], color); 
+        fill_flat_top_triangle(&triangle->points[0], &triangle->points[1], &triangle->points[2], triangle->color); 
     }
 
     else {
@@ -26,10 +26,10 @@ void draw_filled_triangle(triangle_t* triangle, uint32_t color) {
         vec2_t midpoint = calculate_triangle_midpoint(&triangle->points[0], &triangle->points[1], &triangle->points[2]);
 
         //Draw flat-bottom triangle
-        fill_flat_bottom_triangle(&triangle->points[0], &triangle->points[1], &midpoint, color);
+        fill_flat_bottom_triangle(&triangle->points[0], &triangle->points[1], &midpoint, triangle->color);
 
         //Draw flat-top triangle
-        fill_flat_top_triangle(&triangle->points[1], &midpoint, &triangle->points[2], color);
+        fill_flat_top_triangle(&triangle->points[1], &midpoint, &triangle->points[2], triangle->color);
     }
 }
 
@@ -51,17 +51,18 @@ void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint,
 
     float max_width = fabsf(midpoint->x - point1->x);
     for(size_t y = point0->y; y <= midpoint->y; y++) {
-        vec2_t point_start = { x_start, y };
-        vec2_t point_end = { x_end, y };
-        draw_line(&point_start, &point_end, color);
-        x_start += inverse_slope_start;
-        x_end += inverse_slope_end;
-
         //Prevent x_start and x_end from getting out of bounds 
         if(fabsf(x_end - x_start) >= max_width) {
             x_start = point1->x;
             x_end = midpoint->x;
         }
+
+        vec2_t point_start = { roundf(x_start), roundf(y) };
+        vec2_t point_end =   { roundf(x_end),   roundf(y) };
+        draw_line(&point_start, &point_end, color);
+        x_start += inverse_slope_start;
+        x_end += inverse_slope_end;
+
     }
 }
 
@@ -74,16 +75,17 @@ void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, ui
 
     float max_width = fabsf(midpoint->x - point1->x);
     for(size_t y = point2->y; y >= midpoint->y; y--) {
-        vec2_t point_start = { x_start, y };
-        vec2_t point_end = { x_end, y };
-        draw_line(&point_start, &point_end, color);
-        x_start -= inverse_slope_start;
-        x_end -= inverse_slope_end;
-
         if(fabsf(x_end - x_start) > max_width){
             x_start = point1->x;
             x_end = midpoint->x;
         }
+        
+        vec2_t point_start = { roundf(x_start), roundf(y) };
+        vec2_t point_end =   { roundf(x_end),   roundf(y) };
+        draw_line(&point_start, &point_end, color);
+        x_start -= inverse_slope_start;
+        x_end -= inverse_slope_end;
+
     }
 }
 
@@ -100,6 +102,10 @@ void triangle_descending_bubble_sort(triangle_t* triangles) {
             }
         }
     }
+}
+
+void draw_textured_triangle(triangle_t* triangle, uint32_t* texture) {
+
 }
 
 void triangle_swap(triangle_t* a, triangle_t* b) {

@@ -18,6 +18,13 @@ extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
 
+extern bool show_wireframe;
+extern bool show_solid;
+extern bool show_vertex;
+extern bool enable_face_culling;
+extern bool show_light;
+extern bool show_textures;
+
 bool initialize_window(void);
 void draw_grid(uint32_t color);
 void draw_rect(int x, int y, int width, int height, uint32_t color);

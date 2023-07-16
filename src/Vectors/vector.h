@@ -25,7 +25,6 @@ void    vec2_mult(vec2_t* vector, float scalar);
 void    vec2_div(vec2_t* vector, float factor);
 float   vec2_cross(vec2_t* a, vec2_t* b);
 void    vec2_normalize(vec2_t* vector);
-void    vec2_swap(vec2_t* a, vec2_t* b);
 
 float   vec3_length(vec3_t* vector);
 vec3_t  vec3_add(vec3_t* a, vec3_t* b);
@@ -38,7 +37,6 @@ void    vec3_normalize(vec3_t* vector);
 vec3_t  vec3_rotate_x(vec3_t* vector, float angle);
 vec3_t  vec3_rotate_y(vec3_t* vector, float angle);
 vec3_t  vec3_rotate_z(vec3_t* vector, float angle);
-void    vec3_swap(vec3_t* a, vec3_t* b);
 
 vec4_t vec4_from_vec3(vec3_t* vector);
 vec3_t vec3_from_vec4(vec4_t* vector);

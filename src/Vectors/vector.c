@@ -42,12 +42,6 @@ void vec2_normalize(vec2_t* vector) {
     vec2_div(vector, magnitude);
 }
 
-void vec2_swap(vec2_t* a, vec2_t* b) {
-    vec2_t temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
 float vec3_length(vec3_t* vector) {
     return sqrt((vector->x * vector->x) + (vector->y * vector->y) + (vector->z * vector->z));
 }
@@ -129,12 +123,6 @@ vec3_t vec3_rotate_z(vec3_t* vector, float angle) {
     };
 
     return rotated_vector;
-}
-
-void vec3_swap(vec3_t* a, vec3_t* b) {
-    vec3_t temp = *a;
-    *a = *b;
-    *b = temp;
 }
 
 vec4_t vec4_from_vec3(vec3_t* vector) {

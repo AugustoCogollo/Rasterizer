@@ -1,6 +1,8 @@
+#include <math.h>
 #include "triangle.h"
 #include "../DArray/array.h"
 #include "../Display/display.h"
+#include "../Helper/Swap/swap.h"
 
 void draw_filled_triangle(triangle_t* triangle) {
     //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
@@ -105,17 +107,62 @@ void triangle_descending_bubble_sort(triangle_t* triangles) {
 }
 
 void draw_textured_triangle(triangle_t* triangle, uint32_t* texture) {
+    //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
+    if(triangle->points[0].y > triangle->points[1].y) {
+        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
+    }
+    if(triangle->points[1].y > triangle->points[2].y) {
+        vec2_swap(&triangle->points[1], &triangle->points[2]);
+        tex2_swap(&triangle->tex_coords[1], &triangle->tex_coords[2]);
+    }
+    if(triangle->points[0].y > triangle->points[1].y) {
+        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
+    }
 
+    //Render upper part of the triangle (flat-bottom)
+    fill_textured_bottom_triangle(triangle);
+
+    //Render bottom part of the triangle (flat-top)
+    fill_textured_top_triangle(triangle);
 }
 
-void triangle_swap(triangle_t* a, triangle_t* b) {
-    triangle_t temp = *a;
-    *a = *b;
-    *b = temp;
+void fill_textured_bottom_triangle(triangle_t* triangle) {
+    if(triangle->points[1].y - triangle->points[0].y == 0)
+        return;
+
+    float left_inverse_slope  = (triangle->points[1].x - triangle->points[0].x) / fabsf(triangle->points[1].y - triangle->points[0].y);
+    float right_inverse_slope = 0;
+    if(triangle->points[2].y - triangle->points[0].y != 0) right_inverse_slope =(triangle->points[2].x - triangle->points[0].x) / fabsf(triangle->points[2].y - triangle->points[0].y);
+
+    for(size_t y = triangle->points[0].y; y <= triangle->points[1].y; y++) {
+        int x_start = (int)roundf(triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope);
+        int x_end =   (int)roundf(triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope);
+
+        if(x_end < x_start) int_swap(&x_start, &x_end);
+
+        for(size_t x = x_start; x < x_end; x++) {
+            draw_pixel(x, y, (x % 2 == 0 && y % 2 == 0) ? 0xFFFF00FF : 0xFF000000);
+        }
+    }
 }
 
-void int_swap(int* a, int* b) {
-  int temp = *a;
-  *a= *b;
-  *b = temp;
+void fill_textured_top_triangle(const triangle_t* triangle) {
+    if(triangle->points[2].y - triangle->points[1].y == 0)
+        return;
+
+    float left_inverse_slope  = (triangle->points[2].x - triangle->points[1].x) / fabsf(triangle->points[2].y - triangle->points[1].y);
+    float right_inverse_slope = triangle->points[2].y - triangle->points[0].y != 0 ? (triangle->points[2].x - triangle->points[0].x) / fabsf(triangle->points[2].y - triangle->points[0].y) : 0;
+
+    for(size_t y = triangle->points[1].y; y <= triangle->points[2].y; y++) {
+        int x_start = (int)roundf(triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope);
+        int x_end =   (int)roundf(triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope);
+
+        if(x_end < x_start) int_swap(&x_start, &x_end);
+
+        for(size_t x = x_start; x < x_end; x++) {
+            draw_pixel(x, y, (x % 2 == 0 && y % 2 == 0) ? 0xFFFF00FF : 0xFF000000);
+        }
+    }
 }

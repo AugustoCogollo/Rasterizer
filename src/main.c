@@ -74,7 +74,7 @@ void setup(void) {
   texture_height = 64;
 
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/f22.obj");
+  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
 
   vec3_normalize(&global_light.direction);
 }
@@ -307,13 +307,13 @@ void render(void) {
     }
 
     if(show_wireframe) {
-      draw_triangle(&triangle, YELLOW);
+      draw_triangle(&triangle, WHITE);
     }
 
     if(show_vertex) {
-      draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, color_red.value);
-      draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, color_red.value);
-      draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, color_red.value);
+      draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, YELLOW);
+      draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, YELLOW);
+      draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, YELLOW);
     }
   }
   

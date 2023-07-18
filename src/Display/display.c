@@ -1,5 +1,8 @@
 #include <math.h>
 #include "display.h"
+#include "../Helper/Mathr/ren_math.h"
+#include "../DArray/array.h"
+#include "../Texture/texture.h"
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -58,6 +61,27 @@ void draw_pixel(int x, int y, uint32_t color) {
       return;
     }
     color_buffer[(window_width * y) + x] = color;
+}
+
+void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture) {
+  vec2_t point = {x, y};
+  vec3_t weights = barycentric_weights(&triangle->points[0], &triangle->points[1], &triangle->points[2], &point);
+
+  float alpha = weights.x;
+  float beta = weights.y;
+  float gamma = weights.z;
+
+  //Interpolation of the uv values using the barycentric weights
+  float interpolated_u = (triangle->tex_coords[0].u) * alpha + (triangle->tex_coords[1].u) * beta + (triangle->tex_coords[2].u) * gamma;
+  float interpolated_v = (triangle->tex_coords[0].v) * alpha + (triangle->tex_coords[1].v) * beta + (triangle->tex_coords[2].v) * gamma;
+
+  //Map the UV coordinate to the full texture width and height 
+  int tex_x = abs((int)(interpolated_u * texture_width ));
+  int tex_y = abs((int)(interpolated_v * texture_height));
+
+  int tex_index = ((texture_width * tex_y) + tex_x) % (texture_width * texture_height);
+
+  draw_pixel(x, y, texture[(texture_width * tex_y) + tex_x]);
 }
 
 void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color) {

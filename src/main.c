@@ -293,13 +293,14 @@ void render(void) {
     triangle_t triangle =  triangles_to_render[i];
 
     //Triangle points are rounded so that the model does not have gaps and black lines
-    for(size_t i = 0; i < 3; i++){
+    for(size_t i = 0; i < 3; i++) {
         triangle.points[i].x = roundf(triangle.points[i].x);
         triangle.points[i].y = roundf(triangle.points[i].y);
     }
 
     if(show_textures) {
       draw_textured_triangle(&triangle, mesh_texture);
+      show_solid = false;
     }
 
     if(show_solid) {

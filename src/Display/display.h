@@ -30,7 +30,7 @@ void draw_grid(uint32_t color);
 void draw_rect(int x, int y, int width, int height, uint32_t color);
 void draw_pixel(int x, int y, uint32_t color);
 void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture);
-void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color);
+void draw_line(vec4_t* point1, vec4_t* point2, uint32_t color);
 void draw_triangle(triangle_t* triangle, uint32_t color);
 void render_color_buffer(void);
 void clear_color_buffer(uint32_t color);

@@ -38,5 +38,9 @@ vec3_t  vec3_rotate_x(vec3_t* vector, float angle);
 vec3_t  vec3_rotate_y(vec3_t* vector, float angle);
 vec3_t  vec3_rotate_z(vec3_t* vector, float angle);
 
+vec4_t* vec4_sub(vec4_t* a, vec4_t* b);
+vec4_t* vec4_sub(vec4_t* a, vec4_t* b);
+
 vec4_t vec4_from_vec3(vec3_t* vector);
 vec3_t vec3_from_vec4(vec4_t* vector);
+vec2_t vec2_from_vec4(vec4_t* vector);

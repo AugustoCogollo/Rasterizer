@@ -7,13 +7,13 @@
 void draw_filled_triangle(triangle_t* triangle) {
     //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
     if(triangle->points[0].y > triangle->points[1].y){
-        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        vec4_swap(&triangle->points[0], &triangle->points[1]);
     }
     if(triangle->points[1].y > triangle->points[2].y){
-        vec2_swap(&triangle->points[1], &triangle->points[2]);
+        vec4_swap(&triangle->points[1], &triangle->points[2]);
     }
     if(triangle->points[0].y > triangle->points[1].y){
-        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        vec4_swap(&triangle->points[0], &triangle->points[1]);
     }
 
     if(triangle->points[1].y == triangle->points[2].y) {
@@ -25,7 +25,7 @@ void draw_filled_triangle(triangle_t* triangle) {
 
     else {
         //Calculate the midpoint (Mx,My)
-        vec2_t midpoint = calculate_triangle_midpoint(&triangle->points[0], &triangle->points[1], &triangle->points[2]);
+        vec4_t midpoint = calculate_triangle_midpoint(&triangle->points[0], &triangle->points[1], &triangle->points[2]);
 
         //Draw flat-bottom triangle
         fill_flat_bottom_triangle(&triangle->points[0], &triangle->points[1], &midpoint, triangle->color);
@@ -35,15 +35,17 @@ void draw_filled_triangle(triangle_t* triangle) {
     }
 }
 
-vec2_t calculate_triangle_midpoint(vec2_t* point0, vec2_t* point1, vec2_t* point2) {
-    vec2_t midpoint = {
+vec4_t calculate_triangle_midpoint(vec4_t* point0, vec4_t* point1, vec4_t* point2) {
+    vec4_t midpoint = {
         .x = ( ((point2->x - point0->x) * (point1->y - point0->y)) / (point2->y - point0->y) ) + point0->x,
-        .y = point1->y
+        .y = point1->y,
+        .z = 0,
+        .w = 0
     };
     return midpoint;
 }
 
-void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint, uint32_t color) {
+void fill_flat_bottom_triangle(vec4_t* point0, vec4_t* point1, vec4_t* midpoint, uint32_t color) {
     //Change in x per y = inverse slope
     float inverse_slope_start = ((point1->x - point0->x) / (point1->y - point0->y));
     float inverse_slope_end = ((midpoint->x - point0->x) / (midpoint->y - point0->y));
@@ -59,8 +61,8 @@ void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint,
             x_end = midpoint->x;
         }
 
-        vec2_t point_start = { roundf(x_start), roundf(y) };
-        vec2_t point_end =   { roundf(x_end),   roundf(y) };
+        vec4_t point_start = { roundf(x_start), roundf(y), 0, 0 };
+        vec4_t point_end =   { roundf(x_end),   roundf(y), 0, 0 };
         draw_line(&point_start, &point_end, color);
         x_start += inverse_slope_start;
         x_end += inverse_slope_end;
@@ -68,7 +70,7 @@ void fill_flat_bottom_triangle(vec2_t* point0, vec2_t* point1, vec2_t* midpoint,
     }
 }
 
-void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, uint32_t color) {
+void fill_flat_top_triangle(vec4_t* point1, vec4_t* midpoint, vec4_t* point2, uint32_t color) {
     float inverse_slope_start = ((point2->x - point1->x) / (point2->y - point1->y));
     float inverse_slope_end = ((point2->x - midpoint->x) / (point2->y - midpoint->y));
 
@@ -82,8 +84,8 @@ void fill_flat_top_triangle(vec2_t* point1, vec2_t* midpoint, vec2_t* point2, ui
             x_end = midpoint->x;
         }
         
-        vec2_t point_start = { roundf(x_start), roundf(y) };
-        vec2_t point_end =   { roundf(x_end),   roundf(y) };
+        vec4_t point_start = { roundf(x_start), roundf(y), 0, 0 };
+        vec4_t point_end =   { roundf(x_end),   roundf(y), 0, 0 };
         draw_line(&point_start, &point_end, color);
         x_start -= inverse_slope_start;
         x_end -= inverse_slope_end;
@@ -109,15 +111,15 @@ void triangle_descending_bubble_sort(triangle_t* triangles) {
 void draw_textured_triangle(triangle_t* triangle, uint32_t* texture) {
     //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
     if(triangle->points[0].y > triangle->points[1].y) {
-        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        vec4_swap(&triangle->points[0], &triangle->points[1]);
         tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
     }
     if(triangle->points[1].y > triangle->points[2].y) {
-        vec2_swap(&triangle->points[1], &triangle->points[2]);
+        vec4_swap(&triangle->points[1], &triangle->points[2]);
         tex2_swap(&triangle->tex_coords[1], &triangle->tex_coords[2]);
     }
     if(triangle->points[0].y > triangle->points[1].y) {
-        vec2_swap(&triangle->points[0], &triangle->points[1]);
+        vec4_swap(&triangle->points[0], &triangle->points[1]);
         tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
     }
 

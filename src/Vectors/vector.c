@@ -125,6 +125,26 @@ vec3_t vec3_rotate_z(vec3_t* vector, float angle) {
     return rotated_vector;
 }
 
+vec4_t* vec4_add(vec4_t* a, vec4_t* b) {
+    vec4_t* result = &(vec4_t) {
+        .x = a->x + b->x,
+        .y = a->y + b->y,
+        .z = a->z + b->z,
+        .w = a->w + b->w
+    };
+    return result;
+}
+
+vec4_t* vec4_sub(vec4_t* a, vec4_t* b) {
+    vec4_t* result = &(vec4_t) {
+        .x = a->x - b->x,
+        .y = a->y - b->y,
+        .z = a->z - b->z,
+        .w = a->w - b->w
+    };
+    return result;
+}
+
 vec4_t vec4_from_vec3(vec3_t* vector) {
     vec4_t new_vector = { vector->x, vector->y, vector->z, 1.0 };
     return new_vector;
@@ -132,5 +152,10 @@ vec4_t vec4_from_vec3(vec3_t* vector) {
 
 vec3_t vec3_from_vec4(vec4_t* vector) {
     vec3_t new_vector = { vector->x, vector->y, vector->z };
+    return new_vector;
+}
+
+vec2_t vec2_from_vec4(vec4_t* vector) {
+    vec2_t new_vector = { vector->x, vector->y };
     return new_vector;
 }

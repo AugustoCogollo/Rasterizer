@@ -60,7 +60,7 @@ void setup(void) {
     window_width,
     window_height
   );
-  
+
   //Initialize the perspective matrix
   float fov = PI / 3;
   float aspect = (float)window_height / (float)window_width;
@@ -163,8 +163,8 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  mesh.rotation.x += 0.5 * delta_time;
-  //mesh.rotation.y += 0.5 * delta_time;
+  //mesh.rotation.x += 0.5 * delta_time;
+  mesh.rotation.y += 0.5 * delta_time;
   //mesh.rotation.z += 0.5 * delta_time;
 
   // mesh.scale.x += 0.2 * delta_time;
@@ -266,9 +266,9 @@ void update(void) {
 
     triangle_t projected_triangle = {
       .points = {
-        { projected_points[0].x, projected_points[0].y },
-        { projected_points[1].x, projected_points[1].y },
-        { projected_points[2].x, projected_points[2].y }
+        { projected_points[0].x, projected_points[0].y, projected_points[0].z, projected_points[0].w },
+        { projected_points[1].x, projected_points[1].y, projected_points[1].z, projected_points[1].w },
+        { projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w }
       },
       .tex_coords = {
         [0] = mesh_face.a_uv,

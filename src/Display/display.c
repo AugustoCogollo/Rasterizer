@@ -65,15 +65,25 @@ void draw_pixel(int x, int y, uint32_t color) {
 
 void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture) {
   vec2_t point = {x, y};
-  vec3_t weights = barycentric_weights(&triangle->points[0], &triangle->points[1], &triangle->points[2], &point);
+  vec2_t point_a = vec2_from_vec4(&triangle->points[0]);
+  vec2_t point_b = vec2_from_vec4(&triangle->points[1]);
+  vec2_t point_c = vec2_from_vec4(&triangle->points[2]);
+  vec3_t weights = barycentric_weights(&point_a, &point_b, &point_c, &point);
 
   float alpha = weights.x;
   float beta = weights.y;
   float gamma = weights.z;
 
+  float interpolated_u;
+  float interpolated_v;
+
+  float A = alpha * triangle->points[1].w * triangle->points[2].w;
+  float B = beta  * triangle->points[0].w * triangle->points[2].w;
+  float C = gamma * triangle->points[1].w * triangle->points[2].w;
+
   //Interpolation of the uv values using the barycentric weights
-  float interpolated_u = (triangle->tex_coords[0].u) * alpha + (triangle->tex_coords[1].u) * beta + (triangle->tex_coords[2].u) * gamma;
-  float interpolated_v = (triangle->tex_coords[0].v) * alpha + (triangle->tex_coords[1].v) * beta + (triangle->tex_coords[2].v) * gamma;
+  interpolated_u = (triangle->tex_coords[0].u * A) + (triangle->tex_coords[1].u * B) + (triangle->tex_coords[2].u * C) / A + B + C;
+  interpolated_v = (triangle->tex_coords[0].v * A) + (triangle->tex_coords[1].v * B) + (triangle->tex_coords[2].v * C) / A + B + C;
 
   //Map the UV coordinate to the full texture width and height 
   int tex_x = abs((int)(interpolated_u * texture_width ));
@@ -81,10 +91,10 @@ void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture) {
 
   int tex_index = ((texture_width * tex_y) + tex_x) % (texture_width * texture_height);
 
-  draw_pixel(x, y, texture[(texture_width * tex_y) + tex_x]);
+  draw_pixel(x, y, texture[tex_index]);
 }
 
-void draw_line(vec2_t* point1, vec2_t* point2, uint32_t color) {
+void draw_line(vec4_t* point1, vec4_t* point2, uint32_t color) {
   int delta_x = (point2->x - point1->x);
   int delta_y = (point2->y - point1->y);
 

@@ -13,6 +13,7 @@
 #include "Light/light.h"
 #include "Triangle/triangle.h"
 #include "Texture/texture.h"
+#include "lodepng/lodepng.h"
 
 #define PI 3.14159265358979323846
 
@@ -55,7 +56,7 @@ void setup(void) {
 
   color_buffer_texture = SDL_CreateTexture(
     renderer,
-    SDL_PIXELFORMAT_ARGB8888,
+    SDL_PIXELFORMAT_RGBA32,
     SDL_TEXTUREACCESS_STREAMING,
     window_width,
     window_height
@@ -68,13 +69,9 @@ void setup(void) {
   float zfar = 100;
   projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-  //Load hardcoded texture information
-  mesh_texture = (uint32_t*)REDBRICK_TEXTURE;
-  texture_width = 64;
-  texture_height = 64;
-
   //load_cube_mesh_data();
-  load_obj_file("C:/msys64/home/augus/Rasterizer/assets/cube.obj");
+  load_obj_file("./assets/cube.obj");
+  load_png_texture_data("./assets/cube.png");
 
   vec3_normalize(&global_light.direction);
 }
@@ -104,6 +101,7 @@ void process_input(void) {
 
         case SDLK_3:
           show_solid = !show_solid;
+          show_textures = false;
           break;
 
         case SDLK_4:
@@ -112,6 +110,7 @@ void process_input(void) {
 
         case SDLK_5:
           show_textures = !show_textures;
+          show_solid = false;
           break;
 
         case SDLK_c:
@@ -189,13 +188,13 @@ void update(void) {
   mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
   world_matrix = mat4_mult_mat4(&translation_matrix, &world_matrix);
 
-  int num_faces = array_length(mesh.vertex_faces);
+  int num_faces = array_length(mesh.faces);
   for(size_t i = 0; i < num_faces; i++) {
-    face_t mesh_face = mesh.vertex_faces[i];
+    face_t mesh_face = mesh.faces[i];
     vec3_t face_vertices[3];
-    face_vertices[0] = mesh.vertices[mesh_face.a - 1];
-    face_vertices[1] = mesh.vertices[mesh_face.b - 1];
-    face_vertices[2] = mesh.vertices[mesh_face.c - 1];
+    face_vertices[0] = mesh.vertices[mesh_face.a];
+    face_vertices[1] = mesh.vertices[mesh_face.b];
+    face_vertices[2] = mesh.vertices[mesh_face.c];
     
     vec4_t transformed_vertices[3];
     
@@ -300,7 +299,6 @@ void render(void) {
 
     if(show_textures) {
       draw_textured_triangle(&triangle, mesh_texture);
-      show_solid = false;
     }
 
     if(show_solid) {
@@ -327,11 +325,6 @@ void render(void) {
 }
 
 void free_resources(void) {
-  array_free(mesh.vertices);
-  array_free(mesh.tex_coords);
-  array_free(mesh.normals);
-  array_free(mesh.vertex_faces);
-  array_free(mesh.texture_faces);
-  array_free(mesh.normal_faces);
+  destroy_mesh(&mesh);
   free(color_buffer);
 }

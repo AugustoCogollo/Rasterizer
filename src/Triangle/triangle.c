@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include "triangle.h"
 #include "../DArray/array.h"
 #include "../Display/display.h"
@@ -123,9 +124,12 @@ void draw_textured_triangle(triangle_t* triangle, uint32_t* texture) {
         tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
     }
 
+    //Flip the V component for inverted UV coordinates 
+    triangle->tex_coords[0].v = 1.0 - triangle->tex_coords[0].v;
+    triangle->tex_coords[1].v = 1.0 - triangle->tex_coords[1].v;
+    triangle->tex_coords[2].v = 1.0 - triangle->tex_coords[2].v;
     //Render upper part of the triangle (flat-bottom)
     fill_textured_bottom_triangle(triangle, texture);
-
     //Render bottom part of the triangle (flat-top)
     fill_textured_top_triangle(triangle, texture);
 }
@@ -139,16 +143,15 @@ void fill_textured_bottom_triangle(triangle_t* triangle, uint32_t* texture) {
 
     if(triangle->points[2].y - triangle->points[0].y != 0)
         right_inverse_slope = (triangle->points[2].x - triangle->points[0].x) / abs(triangle->points[2].y - triangle->points[0].y);
-
     if(triangle->points[1].y - triangle->points[0].y != 0)
-        for(size_t y = triangle->points[0].y; y <= triangle->points[1].y; y++) {
+        for(int y = triangle->points[0].y; y <= triangle->points[1].y; y++) {
             int x_start = triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope;
             int x_end =   triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope;
 
             if(x_end < x_start) 
                 int_swap(&x_start, &x_end);
 
-            for(size_t x = x_start; x < x_end; x++) {
+            for(int x = x_start; x < x_end; x++) {
                 draw_texel(x, y, triangle, texture);
             }
         }

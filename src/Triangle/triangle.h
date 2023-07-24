@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../Vectors/vector.h"
+#include "../Vectors/vector.h" 
 #include "../Texture/texture.h"
 
 typedef struct {
@@ -11,6 +11,9 @@ typedef struct {
     tex2_t a_uv;
     tex2_t b_uv;
     tex2_t c_uv;
+    int a_norm;
+    int b_norm;
+    int c_norm;
     uint32_t color;
 } face_t;
 

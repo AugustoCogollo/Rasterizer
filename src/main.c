@@ -298,6 +298,12 @@ void render(void) {
     }
 
     if(show_textures) {
+      // draw_textured_triangle(
+      //   triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, triangle.tex_coords[0].u, triangle.tex_coords[0].v,
+      //   triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, triangle.tex_coords[1].u, triangle.tex_coords[1].v,
+      //   triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w, triangle.tex_coords[2].u, triangle.tex_coords[2].v,
+      //   mesh_texture        
+      //   );
       draw_textured_triangle(&triangle, mesh_texture);
     }
 

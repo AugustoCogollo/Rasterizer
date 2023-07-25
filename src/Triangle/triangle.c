@@ -109,73 +109,76 @@ void triangle_descending_bubble_sort(triangle_t* triangles) {
     }
 }
 
+// Draw a textured triangle based on a texture array of colors.
 void draw_textured_triangle(triangle_t* triangle, uint32_t* texture) {
     //Sort the vertices according to their y-coordinate (y0 < y1 < y2)
-    if(triangle->points[0].y > triangle->points[1].y) {
+    if (triangle->points[0].y > triangle->points[1].y) {
         vec4_swap(&triangle->points[0], &triangle->points[1]);
         tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
     }
-    if(triangle->points[1].y > triangle->points[2].y) {
+    if (triangle->points[1].y > triangle->points[2].y) {
         vec4_swap(&triangle->points[1], &triangle->points[2]);
         tex2_swap(&triangle->tex_coords[1], &triangle->tex_coords[2]);
     }
-    if(triangle->points[0].y > triangle->points[1].y) {
+    if (triangle->points[0].y > triangle->points[1].y) {
         vec4_swap(&triangle->points[0], &triangle->points[1]);
         tex2_swap(&triangle->tex_coords[0], &triangle->tex_coords[1]);
     }
 
-    //Flip the V component for inverted UV coordinates 
-    triangle->tex_coords[0].v = 1.0 - triangle->tex_coords[0].v;
+    //Flip the V component for inverted UV coordinates
+    triangle->tex_coords[0].v = 1.0 - triangle->tex_coords[0].v;    
     triangle->tex_coords[1].v = 1.0 - triangle->tex_coords[1].v;
     triangle->tex_coords[2].v = 1.0 - triangle->tex_coords[2].v;
-    //Render upper part of the triangle (flat-bottom)
+
     fill_textured_bottom_triangle(triangle, texture);
-    //Render bottom part of the triangle (flat-top)
+
     fill_textured_top_triangle(triangle, texture);
 }
 
+// Render the upper part of the triangle (flat-bottom)
 void fill_textured_bottom_triangle(triangle_t* triangle, uint32_t* texture) {
-    float left_inverse_slope  = 0;
+    float left_inverse_slope = 0;
     float right_inverse_slope = 0;
+        
+    if (triangle->points[1].y - triangle->points[0].y != 0) left_inverse_slope = (triangle->points[1].x - triangle->points[0].x) / abs(triangle->points[1].y - triangle->points[0].y);
+    if (triangle->points[2].y - triangle->points[0].y != 0) right_inverse_slope = (triangle->points[2].x - triangle->points[0].x) / abs(triangle->points[2].y - triangle->points[0].y);
 
-    if(triangle->points[1].y - triangle->points[0].y != 0)
-        left_inverse_slope = (triangle->points[1].x - triangle->points[0].x) / abs(triangle->points[1].y - triangle->points[0].y);
-
-    if(triangle->points[2].y - triangle->points[0].y != 0)
-        right_inverse_slope = (triangle->points[2].x - triangle->points[0].x) / abs(triangle->points[2].y - triangle->points[0].y);
-    if(triangle->points[1].y - triangle->points[0].y != 0)
-        for(int y = triangle->points[0].y; y <= triangle->points[1].y; y++) {
+    if (triangle->points[1].y - triangle->points[0].y != 0) {
+        for (int y = triangle->points[0].y; y <= triangle->points[1].y; y++) {
             int x_start = triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope;
-            int x_end =   triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope;
+            int x_end = triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope;
 
-            if(x_end < x_start) 
-                int_swap(&x_start, &x_end);
+            if (x_end < x_start) {
+                int_swap(&x_start, &x_end); // swap if x_start is to the right of x_end
+            }
 
-            for(int x = x_start; x < x_end; x++) {
+            for (int x = x_start; x < x_end; x++) {
                 draw_texel(x, y, triangle, texture);
             }
         }
+    }
 }
 
+// Render the bottom part of the triangle (flat-top)
 void fill_textured_top_triangle(triangle_t* triangle, uint32_t* texture) {
-    float left_inverse_slope  = 0;
+    float left_inverse_slope = 0;
     float right_inverse_slope = 0;
 
-    if(triangle->points[2].y - triangle->points[1].y != 0)
-        left_inverse_slope = (triangle->points[2].x - triangle->points[1].x) / fabsf(triangle->points[2].y - triangle->points[1].y);
+    if (triangle->points[2].y - triangle->points[1].y != 0) left_inverse_slope = (triangle->points[2].x - triangle->points[1].x) / abs(triangle->points[2].y - triangle->points[1].y);
+    if (triangle->points[2].y - triangle->points[0].y != 0) right_inverse_slope = (triangle->points[2].x - triangle->points[0].x) / abs(triangle->points[2].y - triangle->points[0].y);
 
-    if(triangle->points[2].y - triangle->points[0].y != 0)
-        right_inverse_slope = (triangle->points[2].x - triangle->points[0].x) / fabsf(triangle->points[2].y - triangle->points[0].y);
+    if (triangle->points[2].y - triangle->points[1].y != 0) {
+        for (int y = triangle->points[1].y; y <= triangle->points[2].y; y++) {
+            int x_start = triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope;
+            int x_end = triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope;
 
-    if(triangle->points[2].y - triangle->points[1].y != 0)
-        for(size_t y = triangle->points[1].y; y <= triangle->points[2].y; y++) {
-            int x_start = (int)triangle->points[1].x + (y - triangle->points[1].y) * left_inverse_slope;
-            int x_end =   (int)triangle->points[0].x + (y - triangle->points[0].y) * right_inverse_slope;
+            if (x_end < x_start) {
+                int_swap(&x_start, &x_end); // swap if x_start is to the right of x_end
+            }
 
-            if(x_end < x_start) int_swap(&x_start, &x_end);
-
-            for(size_t x = x_start; x < x_end; x++) {
+            for (int x = x_start; x < x_end; x++) {
                 draw_texel(x, y, triangle, texture);
             }
         }
+    }
 }

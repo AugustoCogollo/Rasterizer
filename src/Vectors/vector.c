@@ -15,8 +15,8 @@ vec2_t* vec2_add(vec2_t* a, vec2_t* b) {
     return result;
 }
 
-vec2_t* vec2_sub(vec2_t* a, vec2_t* b) {
-    vec2_t* result = &(vec2_t) {
+vec2_t vec2_sub(vec2_t* a, vec2_t* b) {
+    vec2_t result = {
         .x = a->x - b->x,
         .y = a->y - b->y
     };

@@ -20,7 +20,7 @@ typedef struct {
 
 float   vec2_length(vec2_t* vector);
 vec2_t* vec2_add(vec2_t* a, vec2_t* b);
-vec2_t* vec2_sub(vec2_t* a, vec2_t* b);
+vec2_t  vec2_sub(vec2_t* a, vec2_t* b);
 void    vec2_mult(vec2_t* vector, float scalar);
 void    vec2_div(vec2_t* vector, float factor);
 float   vec2_cross(vec2_t* a, vec2_t* b);

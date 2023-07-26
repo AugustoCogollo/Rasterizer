@@ -32,6 +32,6 @@ void fill_flat_top_triangle(vec4_t* point0, vec4_t* midpoint, vec4_t* point2, ui
 
 void triangle_descending_bubble_sort(triangle_t* triangles);
 
-void draw_textured_triangle(triangle_t* triangle, uint32_t* texture);
-void fill_textured_bottom_triangle(triangle_t* triangle, uint32_t* texture);
-void fill_textured_top_triangle(triangle_t* triangle, uint32_t* texture);
+void draw_textured_triangle(triangle_t* triangle, const uint32_t* texture);
+void fill_textured_bottom_triangle(triangle_t* triangle,const uint32_t* texture);
+void fill_textured_top_triangle(triangle_t* triangle, const uint32_t* texture);

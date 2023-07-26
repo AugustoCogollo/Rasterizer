@@ -28,7 +28,6 @@ mat4_t projection_matrix;
 
 void setup(void);
 void process_input(void);
-vec2_t project(vec3_t* point);
 void update(void);
 void render(void);
 void free_resources(void);
@@ -52,6 +51,7 @@ int main(int argc, char* argv[]){
 
 void setup(void) {
   color_buffer = malloc(sizeof(uint32_t) * window_width * window_height);
+  z_buffer = malloc(sizeof(float) * window_width * window_height);
   assert(color_buffer && "Memory could not be allocated for the color buffer.\n");
 
   color_buffer_texture = SDL_CreateTexture(
@@ -70,8 +70,8 @@ void setup(void) {
   projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   //load_cube_mesh_data();
-  load_obj_file("./assets/cube.obj");
-  load_png_texture_data("./assets/cube.png");
+  load_obj_file("./assets/f22.obj");
+  load_png_texture_data("./assets/f22.png");
 
   vec3_normalize(&global_light.direction);
 }
@@ -116,39 +116,11 @@ void process_input(void) {
         case SDLK_c:
           enable_face_culling = !enable_face_culling;
           break;
-
-        // case SDLK_a:
-        //   light_factor += 1;
-        //   printf("%f light factor\n", light_factor);
-        //   break;
-
-        // case SDLK_d:
-        //   light_factor -= 1;
-        //   printf("%f light factor\n", light_factor);
-        //   break;
-
-        // case SDLK_w:
-        //   mesh.rotation.x -= 0.5 * delta_time;
-        //   break;
-
-        // case SDLK_s:
-        //   mesh.rotation.x += 0.5 * delta_time;
-        //   break;
-
-        // case SDLK_q:
-        //   mesh.rotation.z -= 0.5 * delta_time;
-        //   break;
-
-        // case SDLK_e:
-        //   mesh.rotation.z += 0.5 * delta_time;
-        //   break;
       }
       
       break;
   }
 }
-
-
 
 void update(void) {
   uint32_t time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
@@ -162,8 +134,8 @@ void update(void) {
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
 
-  //mesh.rotation.x += 0.5 * delta_time;
-  mesh.rotation.y += 0.5 * delta_time;
+  mesh.rotation.x += 0.5 * delta_time;
+  //mesh.rotation.y += 0.5 * delta_time;
   //mesh.rotation.z += 0.5 * delta_time;
 
   // mesh.scale.x += 0.2 * delta_time;
@@ -298,12 +270,6 @@ void render(void) {
     }
 
     if(show_textures) {
-      // draw_textured_triangle(
-      //   triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, triangle.tex_coords[0].u, triangle.tex_coords[0].v,
-      //   triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, triangle.tex_coords[1].u, triangle.tex_coords[1].v,
-      //   triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w, triangle.tex_coords[2].u, triangle.tex_coords[2].v,
-      //   mesh_texture        
-      //   );
       draw_textured_triangle(&triangle, mesh_texture);
     }
 
@@ -325,7 +291,8 @@ void render(void) {
   array_free(triangles_to_render);
 
   render_color_buffer();
-  clear_color_buffer(color_black.value);
+  clear_color_buffer(DARK_SLATE_GRAY);
+  clear_z_buffer();
 
   SDL_RenderPresent(renderer);
 }
@@ -333,4 +300,5 @@ void render(void) {
 void free_resources(void) {
   destroy_mesh(&mesh);
   free(color_buffer);
+  free(z_buffer);
 }

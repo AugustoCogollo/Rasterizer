@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "display.h"
+#include "../Light/light.h"
 #include "../Helper/Mathr/ren_math.h"
 #include "../DArray/array.h"
 #include "../Texture/texture.h"
@@ -8,16 +9,17 @@
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 uint32_t* color_buffer = NULL;
+float* z_buffer = NULL;
 SDL_Texture* color_buffer_texture = NULL;
 int window_width = 800;
 int window_height = 600;
 
-bool show_wireframe = true;
+bool show_wireframe = false;
 bool show_solid = false;
 bool show_vertex = false;
 bool enable_face_culling = true;
 bool show_light = false;
-bool show_textures = false;
+bool show_textures = true;
 
 bool initialize_window(void) {
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -64,7 +66,7 @@ void draw_pixel(int x, int y, uint32_t color) {
     color_buffer[(window_width * y) + x] = color;
 }
 
-void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture) {
+void draw_texel(int x, int y, triangle_t* triangle, const uint32_t* texture) {
   vec2_t point = {x, y};
   vec2_t point_a = vec2_from_vec4(&triangle->points[0]);
   vec2_t point_b = vec2_from_vec4(&triangle->points[1]);
@@ -96,7 +98,18 @@ void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture) {
   int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
   int tex_index = (texture_width * tex_y) + tex_x;
-  draw_pixel(x, y, texture[tex_index]);
+  //uint32_t texel_color = light_apply_intensity(texture[tex_index], );
+
+  //1/w adjustment so that the closer they are to the camera, the smaller the values will be
+  interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
+
+  //Draw the pixel only if the depth value is less than the one previously stored in the z_buffer
+  if(interpolated_reciprocal_w < z_buffer[(window_width * y) + x]) {
+    draw_pixel(x, y, texture[tex_index]);
+
+    //Update the z-buffer with the value of 1/w
+    z_buffer[(window_width * y) + x] = interpolated_reciprocal_w;
+  }
 }
 
 void draw_line(vec4_t* point1, vec4_t* point2, uint32_t color) {
@@ -160,6 +173,13 @@ void clear_color_buffer(uint32_t color){
   for(size_t y = 0; y < window_height; y++)
     for(size_t x = 0; x < window_width; x++){
       color_buffer[(window_width * y) + x] = color; 
+    }
+}
+
+void clear_z_buffer(void) {
+  for(size_t y = 0; y < window_height; y++)
+    for(size_t x = 0; x < window_width; x++){
+      z_buffer[(window_width * y) + x] = 1.0;
     }
 }
 

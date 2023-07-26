@@ -6,7 +6,7 @@
 #include "../Vectors/vector.h"
 #include "../Triangle/triangle.h"
 
-#define FPS 60
+#define FPS 30
 #define FRAME_TARGET_TIME (1000/FPS)
 
 extern SDL_Window* window;
@@ -14,6 +14,8 @@ extern SDL_Renderer* renderer;
 
 extern uint32_t* color_buffer;
 extern SDL_Texture* color_buffer_texture;
+
+extern float* z_buffer;
 
 extern int window_width;
 extern int window_height;
@@ -29,9 +31,10 @@ bool initialize_window(void);
 void draw_grid(uint32_t color);
 void draw_rect(int x, int y, int width, int height, uint32_t color);
 void draw_pixel(int x, int y, uint32_t color);
-void draw_texel(int x, int y, triangle_t* triangle, uint32_t* texture);
+void draw_texel(int x, int y, triangle_t* triangle, const uint32_t* texture);
 void draw_line(vec4_t* point1, vec4_t* point2, uint32_t color);
 void draw_triangle(triangle_t* triangle, uint32_t color);
 void render_color_buffer(void);
 void clear_color_buffer(uint32_t color);
+void clear_z_buffer(void);
 void clean_up(void);

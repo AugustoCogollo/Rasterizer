@@ -83,22 +83,31 @@ void draw_texel(int x, int y, triangle_t* triangle, const uint32_t* texture) {
   float interpolated_reciprocal_w;
 
   // Perform the interpolation of all U/w and V/w values using barycentric weights and a factor of 1/w
-  interpolated_u = (triangle->tex_coords[0].u / triangle->points[0].w) * alpha + (triangle->tex_coords[1].u / triangle->points[1].w) * beta + (triangle->tex_coords[2].u / triangle->points[2].w) * gamma;
-  interpolated_v = (triangle->tex_coords[0].v / triangle->points[0].w) * alpha + (triangle->tex_coords[1].v / triangle->points[1].w) * beta + (triangle->tex_coords[2].v / triangle->points[2].w) * gamma;
+  interpolated_u = (
+    (alpha * triangle->tex_coords[0].u * triangle->points[1].w * triangle->points[2].w) +
+    (beta * triangle->tex_coords[1].u * triangle->points[0].w * triangle->points[2].w)  +
+    (gamma * triangle->tex_coords[2].u * triangle->points[0].w * triangle->points[1].w)
+    ) / (triangle->points[0].w * triangle->points[1].w * triangle->points[2].w);
+  interpolated_v = (
+    (alpha * triangle->tex_coords[0].v * triangle->points[1].w * triangle->points[2].w) +
+    (beta * triangle->tex_coords[1].v * triangle->points[0].w * triangle->points[2].w)  +
+    (gamma * triangle->tex_coords[2].v * triangle->points[0].w * triangle->points[1].w)
+    ) / (triangle->points[0].w * triangle->points[1].w * triangle->points[2].w);
 
   // Also interpolate the value of 1/w for the current pixel
-  interpolated_reciprocal_w = (1 / triangle->points[0].w) * alpha + (1 / triangle->points[1].w) * beta + (1 / triangle->points[2].w) * gamma;
+  interpolated_reciprocal_w = ((alpha * triangle->points[1].w * triangle->points[2].w) +
+                               (beta * triangle->points[0].w * triangle->points[2].w) + 
+                               (gamma * triangle->points[0].w * triangle->points[1].w)) / (triangle->points[0].w * triangle->points[1].w * triangle->points[2].w);
 
   // Now we can divide back both interpolated values by 1/w
-  interpolated_u /= interpolated_reciprocal_w;
-  interpolated_v /= interpolated_reciprocal_w;
+  interpolated_u *= (1.0 / interpolated_reciprocal_w);
+  interpolated_v *= (1.0 / interpolated_reciprocal_w);
 
   // Map the UV coordinate to the full texture width and height
   int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
   int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
   int tex_index = (texture_width * tex_y) + tex_x;
-  //uint32_t texel_color = light_apply_intensity(texture[tex_index], );
 
   //1/w adjustment so that the closer they are to the camera, the smaller the values will be
   interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;

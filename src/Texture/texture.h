@@ -14,4 +14,5 @@ extern unsigned int texture_height;
 extern unsigned char* png_texture;
 extern uint32_t* mesh_texture;
 
-void load_png_texture_data(char* filename);
+void load_png_texture_data(const char* filename);
+void decodeTwoSteps(const char* filename);

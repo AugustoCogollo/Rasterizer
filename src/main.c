@@ -71,7 +71,7 @@ void setup(void) {
 
   //load_cube_mesh_data();
   load_obj_file("./assets/f22.obj");
-  load_png_texture_data("./assets/f22.png");
+  decodeTwoSteps("./assets/f22.png");
 
   vec3_normalize(&global_light.direction);
 }
@@ -252,9 +252,6 @@ void update(void) {
 
     array_push(triangles_to_render, projected_triangle);
   }
-
-  //Sort triangles according to their depth
-  triangle_descending_bubble_sort(triangles_to_render); 
 }
 
 void render(void) {

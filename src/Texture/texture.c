@@ -24,11 +24,10 @@ void decodeTwoSteps(const char* filename) {
     unsigned char* image = 0;
     unsigned char* png = 0;
     size_t pngsize;
-    printf("TW: %d | TH: %d", texture_width, texture_height);
+
     error = lodepng_load_file(&png, &pngsize, filename);
     if(!error) error = lodepng_decode32(&image, &texture_width, &texture_height, png, pngsize);
     if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
-    printf("TW: %d | TH: %d", texture_width, texture_height);
 
     free(png);
 

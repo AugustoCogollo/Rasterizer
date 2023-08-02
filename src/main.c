@@ -181,38 +181,38 @@ void update(void) {
 
     uint32_t triangle_color = mesh_face.color;
 
+    //Check backface culling before projecting
+    vec3_t vector_a = vec3_from_vec4(&transformed_vertices[0]);/*    A    */
+    vec3_t vector_b = vec3_from_vec4(&transformed_vertices[1]);/*   / \   */
+    vec3_t vector_c = vec3_from_vec4(&transformed_vertices[2]);/*  C---B  */
+
+    vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
+    vec3_normalize(&vector_ab);
+    vec3_t vector_ac = vec3_sub(&vector_c, &vector_a); //C-A vector
+    vec3_normalize(&vector_ac);
+
+    //Compute face normal (left handed system)
+    vec3_t normal = vec3_cross(&vector_ab, &vector_ac);
+
+    //Normalize the face normal vector
+    vec3_normalize(&normal);
+
     if(enable_face_culling) {
-      //Check backface culling before projecting
-      vec3_t vector_a = vec3_from_vec4(&transformed_vertices[0]);/*    A    */
-      vec3_t vector_b = vec3_from_vec4(&transformed_vertices[1]);/*   / \   */
-      vec3_t vector_c = vec3_from_vec4(&transformed_vertices[2]);/*  C---B  */
-
-      vec3_t vector_ab = vec3_sub(&vector_b, &vector_a); //B-A vector
-      vec3_normalize(&vector_ab);
-      vec3_t vector_ac = vec3_sub(&vector_c, &vector_a); //C-A vector
-      vec3_normalize(&vector_ac);
-
-      //Compute face normal (left handed system)
-      vec3_t normal = vec3_cross(&vector_ab, &vector_ac);
-
-      //Normalize the face normal vector
-      vec3_normalize(&normal);
-
       //Find the vector between the camera position and point A
       vec3_t camera_ray = vec3_sub(&camera_position, &vector_a);
 
       //Calculate how aligned the normal is with the camera ray 
       float dot_normal_camera = vec3_dot(&normal, &camera_ray);
 
-      if(show_light) {
-        //Calculate how aligned the normal is with the camera ray
-        float dot_normal_light = -vec3_dot(&normal, &global_light.direction);
-        triangle_color = light_apply_intensity(triangle_color, dot_normal_light);
-      }
-
       if(dot_normal_camera < 0) {
         continue;
       }
+    }
+
+    if(show_light) {
+      //Calculate how aligned the normal is with the camera ray
+      float dot_normal_light = -vec3_dot(&normal, &global_light.direction);
+      triangle_color = light_apply_intensity(triangle_color, dot_normal_light);
     }
 
     vec4_t projected_points[3];
@@ -232,9 +232,6 @@ void update(void) {
       projected_points[j].y += (window_height / 2.0);
     }
 
-    //Calculate the average depth of the triangle vertices after transformation
-    float depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z);
-
     triangle_t projected_triangle = {
       .points = {
         { projected_points[0].x, projected_points[0].y, projected_points[0].z, projected_points[0].w },
@@ -246,8 +243,7 @@ void update(void) {
         [1] = mesh_face.b_uv,
         [2] = mesh_face.c_uv
       },
-      .color = triangle_color,
-      .avg_depth = depth
+      .color = triangle_color
     };
 
     array_push(triangles_to_render, projected_triangle);

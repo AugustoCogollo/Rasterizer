@@ -22,13 +22,12 @@ typedef struct {
     vec4_t points[3];
     tex2_t tex_coords[3];
     uint32_t color;
-    float avg_depth;
 } triangle_t;
 
 void draw_filled_triangle(triangle_t* triangle);
-vec4_t calculate_triangle_midpoint(vec4_t* point0, vec4_t* point1, vec4_t* point);
 void fill_flat_bottom_triangle(vec4_t* point0, vec4_t* point1, vec4_t* midpoint, uint32_t color);
 void fill_flat_top_triangle(vec4_t* point0, vec4_t* midpoint, vec4_t* point2, uint32_t color);
+void draw_triangle_pixel(int x, int y, vec4_t* point_a, vec4_t* point_b, vec4_t* point_c, uint32_t color);   
 
 void triangle_descending_bubble_sort(triangle_t* triangles);
 

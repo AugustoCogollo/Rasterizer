@@ -5,6 +5,11 @@
 #include "mesh.h"
 #include "../DArray/array.h"
 
+size_t mesh_total_vertices = 0;
+size_t mesh_total_tex_coords = 0;
+size_t mesh_total_normals = 0;
+size_t mesh_total_faces = 0;
+
 mesh_t mesh = {
   .vertices = NULL,
   .normals = NULL,
@@ -57,6 +62,38 @@ void load_cube_mesh_data(void) {
   }
 }
 
+void prepare_mesh(char* filename) {
+  FILE* file_id;
+  char line[1024];
+
+  if((file_id = fopen(filename, "r")) == NULL) {
+    printf("There was an error trying to open the file \n");
+    return;
+  }
+
+  while(fgets(line, sizeof(line), file_id)) {
+    char* saveptr = NULL;
+    char line_copy[1024];
+    strcpy(line_copy, line);
+    char* token = strtok_r(line_copy, " ", &saveptr);
+
+    if(strcmp(token, "v") == 0)
+      mesh_total_vertices++;
+
+    if(strcmp(token, "vt") == 0)
+      mesh_total_tex_coords++;
+
+    if(strcmp(token, "vn") == 0)
+      mesh_total_normals++;
+
+    if(strcmp(token, "f") == 0)
+      mesh_total_faces++;
+  }
+  mesh.vertices = malloc(sizeof(vec3_t) * mesh_total_vertices);
+  mesh.normals = malloc(sizeof(vec3_t) * mesh_total_normals);
+  mesh.faces = malloc(sizeof(face_t) * mesh_total_faces);
+}
+
 void load_obj_file(char* filename) {
   FILE* file_id;
   char line[1024];
@@ -66,7 +103,12 @@ void load_obj_file(char* filename) {
     return;
   }
 
-  tex2_t* tex_coords = NULL;
+  size_t current_vertex = 0;
+  size_t current_tex_coord = 0;
+  size_t current_normal = 0;
+  size_t current_face = 0;
+
+  tex2_t tex_coords[mesh_total_tex_coords];
 
   while(fgets(line, sizeof(line), file_id)) {
     char* saveptr = NULL;
@@ -78,22 +120,25 @@ void load_obj_file(char* filename) {
     if(strcmp(token, "v") == 0){
       vec3_t vertex;
       sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, & vertex.z);
-      array_push(mesh.vertices, vertex);
+      mesh.vertices[current_vertex] = vertex;
+      current_vertex++;
     }
 
     else if(strcmp(token, "vt") == 0) {
       tex2_t tex_coord;
       sscanf(line, "vt %f %f", &tex_coord.u, &tex_coord.v);
-      array_push(tex_coords, tex_coord);
+      tex_coords[current_tex_coord] = tex_coord;
+      current_tex_coord++;  
     }
 
     else if(strcmp(token, "vn") == 0){
       vec3_t normal;
       sscanf(line, "vn %f %f %f", &normal.x, &normal.y, &normal.z);
-      array_push(mesh.normals, normal);
+      mesh.normals[current_normal] = normal;
+      current_normal++;
     }
 
-    else if(strcmp(token, "f") == 0){
+    else if(strcmp(token, "f") == 0) {
         char* saveptr_index = NULL;
         char* data;
         face_t face;
@@ -119,7 +164,8 @@ void load_obj_file(char* filename) {
         face.c_uv = tex_coords[texture_indices[2] - 1];
         face.color = 0xFFFFFFFF;
 
-        array_push(mesh.faces, face);
+        mesh.faces[current_face] = face;
+        current_face++;
     }
     //free(tex_coords);
   }
@@ -128,7 +174,7 @@ void load_obj_file(char* filename) {
 }
 
 void destroy_mesh(mesh_t* mesh) {
-  array_free(mesh->vertices);
-  array_free(mesh->normals);
-  array_free(mesh->faces);
+  free(mesh->vertices);
+  free(mesh->normals);
+  free(mesh->faces);
 }

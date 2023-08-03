@@ -17,7 +17,8 @@
 
 #define PI 3.14159265358979323846
 
-triangle_t* triangles_to_render = NULL;
+triangle_t* triangles_to_render;
+size_t num_triangles_to_render = 0;
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -70,8 +71,10 @@ void setup(void) {
   projection_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   //load_cube_mesh_data();
+  prepare_mesh("./assets/f22.obj");
   load_obj_file("./assets/f22.obj");
   decodeTwoSteps("./assets/f22.png");
+  triangles_to_render = malloc(sizeof(triangle_t) * mesh_total_faces);
 
   vec3_normalize(&global_light.direction);
 }
@@ -125,14 +128,14 @@ void process_input(void) {
 void update(void) {
   uint32_t time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
 
-  triangles_to_render = NULL;
-
   if(time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME){
     SDL_Delay(time_to_wait);
   }
 
   delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0f;
   previous_frame_time = SDL_GetTicks();
+
+  num_triangles_to_render = 0;
 
   mesh.rotation.x += 0.5 * delta_time;
   //mesh.rotation.y += 0.5 * delta_time;
@@ -160,8 +163,7 @@ void update(void) {
   mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
   world_matrix = mat4_mult_mat4(&translation_matrix, &world_matrix);
 
-  int num_faces = array_length(mesh.faces);
-  for(size_t i = 0; i < num_faces; i++) {
+  for(size_t i = 0; i < mesh_total_faces; i++) {
     face_t mesh_face = mesh.faces[i];
     vec3_t face_vertices[3];
     face_vertices[0] = mesh.vertices[mesh_face.a];
@@ -245,15 +247,18 @@ void update(void) {
       },
       .color = triangle_color
     };
-
-    array_push(triangles_to_render, projected_triangle);
+    
+    if(num_triangles_to_render < mesh_total_faces){
+      triangles_to_render[num_triangles_to_render] = projected_triangle;
+      num_triangles_to_render++;
+    }
   }
 }
 
 void render(void) {
   //Render all the projected points
-  int num_triangles = array_length(triangles_to_render);
-  for(size_t i = 0; i < num_triangles; i++) {
+
+  for(size_t i = 0; i < num_triangles_to_render; i++) {
     triangle_t triangle =  triangles_to_render[i];
 
     //Triangle points are rounded so that the model does not have gaps and black lines
@@ -281,8 +286,6 @@ void render(void) {
     }
   }
   
-  array_free(triangles_to_render);
-
   render_color_buffer();
   clear_color_buffer(DARK_SLATE_GRAY);
   clear_z_buffer();
@@ -292,6 +295,7 @@ void render(void) {
 
 void free_resources(void) {
   destroy_mesh(&mesh);
+  free(triangles_to_render);
   free(color_buffer);
   free(z_buffer);
 }
